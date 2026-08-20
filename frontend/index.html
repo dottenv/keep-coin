@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#059669" />
+    <meta name="description" content="Keep Coin — учёт личных и семейных финансов" />
+    <title>Keep Coin</title>
+    <script>
+      // Применить сохранённую тему до первого рендера (исключает «мигание»).
+      try {
+        var kcTheme = localStorage.getItem('keep-coin-theme')
+        if (kcTheme === 'dark') document.documentElement.classList.add('dark')
+      } catch (e) {}
+    </script>
+    <style>
+      /* Базовый слой, пока не загрузился бандл CSS (мобильные/медленный сеть) */
+      html,
+      body {
+        margin: 0;
+        background: #f0f5f9;
+        color: #0f172a;
+        -webkit-font-smoothing: antialiased;
+      }
+      html.dark body {
+        background: #04060f;
+        color: #e2e8f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,81 @@
+name: keep-coin
+
+# Dev-среда + бесплатные домены через CloudPub.
+# CloudPub-агент автоматически публикует frontend (Vite) и выдаёт
+# поддомен вида https://<random>.cloudpub.ru с бесплатным SSL.
+# /api/* проксируется Vite на backend внутри сети compose, поэтому
+# JWT-куки остаются same-origin — отдельный туннель для API не нужен.
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: keep-coin-backend
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: development
+      FLASK_APP: run.py
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env (see .env.example)}
+      DATABASE_URL: sqlite:////data/keep_coin.db
+      # CloudPub отдаёт HTTPS — куки должны помечаться как Secure.
+      JWT_COOKIE_SECURE: "true"
+      JWT_COOKIE_SAMESITE: Lax
+    volumes:
+      - ./backend:/app
+      - keep_coin_db:/data
+    command: sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 4 --reload run:app"
+    expose:
+      - "5000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/api/health', timeout=5).status==200 else 1)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+    image: keep-coin-frontend
+    restart: unless-stopped
+    environment:
+      # Внутри compose backend доступен по имени сервиса.
+      VITE_PROXY_TARGET: http://backend:5000
+      # bind-mount на Windows/Docker Desktop: без polling Vite не видит изменения.
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    expose:
+      - "5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5173 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Агент CloudPub: сам регистрирует ресурс, выдаёт поддомен *.cloudpub.ru
+  # и выпускает SSL-сертификат. Адрес сохраняется в volume cloudpub-config,
+  # поэтому при перезапуске остаётся тот же URL.
+  cloudpub:
+    image: cloudpub/cloudpub:latest
+    restart: unless-stopped
+    environment:
+      TOKEN: ${CLOUDPUB_TOKEN:?Set CLOUDPUB_TOKEN in .env (see .env.example)}
+      HTTP: frontend:5173
+    command: run
+    volumes:
+      - cloudpub-config:/home/cloudpub
+    depends_on:
+      frontend:
+        condition: service_healthy
+
+volumes:
+  keep_coin_db:
+  frontend_node_modules:
+  cloudpub-config:
