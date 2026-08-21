@@ -90,15 +90,38 @@
     box-shadow: 0 0 18px rgba(16, 185, 129, 0.18);
   }
 
-  /* Неоновое свечение для акцентных (брендовых градиентных) элементов. */
+  /* Неоновое свечение для всех градиентных кнопок/действий.
+     Каждый акцентный цвет светится в своей гамме — логично и равномерно. */
   .ultra .from-brand-500,
-  .ultra .from-brand-400 {
+  .ultra .from-brand-400,
+  .ultra .from-emerald-500,
+  .ultra .from-emerald-400 {
     box-shadow:
       0 0 22px rgba(16, 185, 129, 0.50),
       0 0 42px rgba(20, 184, 166, 0.22);
   }
+  .ultra .from-rose-500 {
+    box-shadow:
+      0 0 22px rgba(244, 63, 94, 0.45),
+      0 0 42px rgba(251, 113, 133, 0.20);
+  }
+  .ultra .from-sky-500 {
+    box-shadow:
+      0 0 22px rgba(14, 165, 233, 0.45),
+      0 0 42px rgba(56, 189, 248, 0.20);
+  }
+  .ultra .from-red-500,
+  .ultra .from-red-600 {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.42);
+  }
   .ultra .text-brand-600 {
     text-shadow: 0 0 14px rgba(52, 211, 153, 0.55);
+  }
+
+  /* Равномерное неоновое фокус-кольцо для любых кнопок в Ultra. */
+  .ultra button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.30);
   }
 
   /* Поля ввода/выбора в Ultra — неоновая рамка и свечение при фокусе. */

@@ -6,15 +6,13 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode
 }
 
-/** Стеклянная карточка: полупрозрачная поверхность с размытием фона. */
+/** Стеклянная карточка: полупрозрачная поверхность с размытием фона.
+ *  Базируется на классе `.glass-card`, чтобы в теме Ultra получала
+ *  единое неоновое оформление вместе со всеми остальными поверхностями. */
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
-      className={cn(
-        'rounded-[1.5rem] border border-white/60 bg-white/70 shadow-soft backdrop-blur-xl',
-        'dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_10px_40px_rgba(2,6,23,0.5)]',
-        className,
-      )}
+      className={cn('glass-card', className)}
       {...props}
     >
       {children}
