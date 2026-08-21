@@ -267,6 +267,7 @@ export const en: Ru = {
     recurring: 'Recurring',
     recurringNote: 'Appears across different months — looks like a regular payment',
     by: 'by {{name}}',
+    author: 'Author',
     noTitleHint: 'No title needed — this is a transfer between accounts',
     searchPlaceholder: 'Search by title...',
     period: 'Period',

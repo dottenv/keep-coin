@@ -265,6 +265,7 @@ export const ru = {
     recurring: 'Повторяется',
     recurringNote: 'Встречается в разных месяцах — похоже на регулярный платёж',
     by: 'от {{name}}',
+    author: 'Автор',
     noTitleHint: 'Название не требуется — это перевод между счетами',
     searchPlaceholder: 'Поиск по названию...',
     period: 'Период',
