@@ -139,6 +139,10 @@ class TransactionOutSchema(Schema):
         if getattr(obj, "category_obj", None)
         else None
     )
+    # Автор операции: заполняется сервисом для операций, созданных другим
+    # пользователем (семейный/общий доступ). Для своих операций is_own=True.
+    author_name = fields.Function(lambda obj: getattr(obj, "_author_name", None))
+    is_own = fields.Function(lambda obj: getattr(obj, "_is_own", True))
     amount = fields.Float()
     currency = fields.Str()
     date = fields.Date()

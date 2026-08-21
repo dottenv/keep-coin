@@ -54,7 +54,7 @@ class TransactionService:
             rows = [tx for tx in rows if q in tx.title.casefold()]
 
         _ensure_phrases_synced(user_id)
-        return _mark_recurring(user_id, rows[:limit])
+        return _attach_authors(user_id, _mark_recurring(user_id, rows[:limit]))
 
     @staticmethod
     def get_for_user(user_id, transaction_id) -> Transaction:
@@ -68,7 +68,7 @@ class TransactionService:
         ):
             raise ApiError("transaction_not_found", 404)
         _ensure_phrases_synced(user_id)
-        return _mark_recurring(user_id, [tx])[0]
+        return _attach_authors(user_id, _mark_recurring(user_id, [tx]))[0]
 
     @staticmethod
     def create(user_id, data: dict) -> Transaction:
@@ -457,6 +457,22 @@ def _mark_recurring(user_id, txs: list) -> list:
     titles = _recurring_titles(user_id)
     for tx in txs:
         tx.recurring = _tx_title(tx) in titles
+    return txs
+
+
+def _attach_authors(user_id, txs: list) -> list:
+    """Проставляет `_author_name`/`_is_own` для отображения автора операции.
+
+    Автор показывается только для операций, созданных другим пользователем
+    (семейный/общий доступ), чтобы было видно, кто и что внёс.
+    """
+    if not txs:
+        return txs
+    ids = {t.user_id for t in txs}
+    names = {u.id: u.display_name for u in User.query.filter(User.id.in_(ids)).all()}
+    for t in txs:
+        t._author_name = names.get(t.user_id)
+        t._is_own = t.user_id == user_id
     return txs
 
 
