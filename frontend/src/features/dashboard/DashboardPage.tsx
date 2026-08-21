@@ -10,10 +10,9 @@ import { DonutChart, type DonutSegment } from '@/components/ui/DonutChart'
 import { SectionHeader } from './components/SectionHeader'
 import { BalanceCarousel } from './components/BalanceCarousel'
 import { TransactionsList } from './components/TransactionsList'
-import { fetchAccounts, type Account } from '@/features/accounts/api'
-import { fetchTransactions } from '@/features/transactions/api'
-import { fetchSummary } from '@/features/transactions/api'
-import { fetchPlanner } from '@/features/planner/api'
+import { fetchAccounts } from '@/features/accounts/api'
+import { fetchTransactions, fetchSummary, type Summary } from '@/features/transactions/api'
+import { fetchPlanner, type PlannerOverview } from '@/features/planner/api'
 import { formatMoney, todayISO } from '@/lib/format'
 import { useAuth } from '@/features/auth/AuthContext'
 import { cn } from '@/lib/cn'
@@ -112,13 +111,13 @@ function PlanWidget({
   currency,
   hasAccounts,
 }: {
-  plan: ReturnType<typeof useQuery>['data'] extends infer D ? D : never
+  plan: PlannerOverview | undefined
   currency: string
   hasAccounts: boolean
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const p = plan as unknown as import('@/features/planner/api').PlannerOverview | undefined
+  const p = plan
 
   if (!hasAccounts) return null
 
@@ -172,7 +171,7 @@ function CategoryWidget({
   loading,
   onAnalytics,
 }: {
-  summary: import('@/features/transactions/api').Summary | undefined
+  summary: Summary | undefined
   currency: string
   loading: boolean
   onAnalytics: () => void

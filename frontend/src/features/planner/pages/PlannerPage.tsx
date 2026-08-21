@@ -46,7 +46,6 @@ export function PlannerPage() {
   }
 
   const data = planner.data
-  const monthLabel = formatMonthYear(data.month)
   const incomeBudgets = data.budgets.filter((b) => b.kind === 'income')
   const expenseBudgets = data.budgets.filter((b) => b.kind === 'expense')
 
@@ -123,6 +122,7 @@ function Onboarding() {
 
 function MonthPlanHero({ data }: { data: PlannerOverview }) {
   const { t } = useTranslation()
+  const monthLabel = formatMonthYear(data.month)
   const currency = data.currency
   const allocated = data.planned_expenses + data.savings_target
   const allocatedPct = data.planned_income > 0 ? (allocated / data.planned_income) * 100 : allocated > 0 ? 100 : 0
@@ -311,7 +311,7 @@ function Insights({ insights, currency }: { insights: PlannerInsight[]; currency
   )
 }
 
-function insightText(t: (k: string) => string, ins: PlannerInsight, currency: string): { title: string; desc: string } {
+function insightText(t: (k: string, opts?: Record<string, unknown>) => string, ins: PlannerInsight, currency: string): { title: string; desc: string } {
   switch (ins.code) {
     case 'no_plan':
       return { title: t('insights.no_plan.title'), desc: t('insights.no_plan.desc') }
@@ -388,7 +388,6 @@ function BudgetSection({
   emptyText: string
   emptyCta: string
 }) {
-  const { t } = useTranslation()
   return (
     <section className="space-y-3 animate-fade-in-up">
       <SectionHeaderLink title={title} to={to} label={cta} />
