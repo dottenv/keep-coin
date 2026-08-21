@@ -125,7 +125,7 @@ export function FloatingAction() {
                 key={action.type}
                 type="button"
                 onClick={() => onAction(action)}
-                className="pressable flex items-center gap-2.5 rounded-full bg-white/85 py-2 pr-4 pl-2 text-sm font-semibold text-ink-800 shadow-lifted ring-1 ring-ink-100 backdrop-blur-xl animate-fade-in-up dark:bg-ink-900/80 dark:text-ink-100 dark:ring-white/10 ultra:ring-emerald-400/30 ultra:shadow-[0_0_16px_rgba(16,185,129,0.20)]"
+                className="pressable flex items-center gap-2.5 rounded-full bg-white/85 py-2 pr-4 pl-2 text-sm font-semibold text-ink-800 shadow-lifted ring-1 ring-ink-100 backdrop-blur-xl animate-fade-in-up dark:bg-ink-900/80 dark:text-ink-100 dark:ring-white/10 ultra:ring-white/20"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <span

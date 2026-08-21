@@ -195,7 +195,7 @@ export function StatsPage() {
             <div className="mt-4 flex flex-col items-center gap-5">
               <DonutChart
                 segments={donutSegments}
-                className="ultra:[filter:drop-shadow(0_0_10px_rgba(16,185,129,0.35))]"
+                className={undefined}
                 centerValue={<AnimatedNumber value={data.total_expense} format={(v) => formatMoney(v, currency)} className="text-2xl" />}
                 centerLabel={t('stats.expense')}
               />

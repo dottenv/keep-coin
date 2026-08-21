@@ -224,7 +224,7 @@ export function AccountsPage() {
               className={cn(
                 'glass-card flex items-center gap-3 p-4 transition-shadow',
                 dragIndex === index
-                  ? 'ring-2 ring-brand-400/60 ultra:ring-emerald-400/60'
+                  ? 'ring-2 ring-brand-400/60 ultra:ring-white/60'
                   : '',
               )}
             >

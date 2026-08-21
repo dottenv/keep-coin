@@ -65,7 +65,7 @@ export function DashboardPage() {
           <Card className="relative overflow-hidden p-5 animate-fade-in-up sm:p-6">
             <div
               aria-hidden
-              className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-gradient-to-br from-brand-400/40 to-emerald-400/30 blur-3xl ultra:from-emerald-400/40 ultra:to-teal-400/30"
+              className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-gradient-to-br from-brand-400/40 to-emerald-400/30 blur-3xl ultra:from-white/20 ultra:to-transparent"
             />
             <p className="text-sm font-medium text-ink-500 dark:text-ink-300">{t('dashboard.totalBalance')}</p>
             <p className="mt-1 text-4xl font-bold tabular-nums tracking-tight text-ink-900 dark:text-ink-100">

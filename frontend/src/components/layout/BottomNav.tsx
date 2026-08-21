@@ -48,7 +48,7 @@ export function BottomNav() {
       aria-label="Primary"
       className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4"
     >
-      <div         className="pointer-events-auto flex w-full max-w-md items-center justify-around rounded-[1.75rem] border border-white/60 bg-white/80 p-2 shadow-lifted backdrop-blur-xl animate-fade-in-up dark:border-white/10 dark:bg-ink-900/60 dark:shadow-[0_10px_40px_rgba(2,6,23,0.5)] ultra:border-emerald-400/30 ultra:bg-emerald-950/40 ultra:shadow-[0_0_30px_rgba(16,185,129,0.25)]">
+      <div         className="pointer-events-auto flex w-full max-w-md items-center justify-around rounded-[1.75rem] border border-white/60 bg-white/80 p-2 shadow-lifted backdrop-blur-xl animate-fade-in-up dark:border-white/10 dark:bg-ink-900/60 dark:shadow-[0_10px_40px_rgba(2,6,23,0.5)] ultra:border-white/20 ultra:bg-white/[0.10]">
         {ITEMS.map((item) => (
           <NavLink
             key={item.key}
@@ -58,7 +58,7 @@ export function BottomNav() {
               cn(
                 'pressable flex flex-col items-center gap-0.5 rounded-2xl px-3.5 py-1.5 text-[0.65rem] font-semibold transition-colors',
                 isActive
-                  ? 'bg-brand-50/80 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300 ultra:bg-emerald-400/20 ultra:text-emerald-200 ultra:shadow-[0_0_18px_rgba(16,185,129,0.35)]'
+                  ? 'bg-brand-50/80 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300 ultra:bg-white/15 ultra:text-white'
                   : 'text-ink-400 hover:text-ink-700 dark:hover:text-ink-200',
               )
             }
