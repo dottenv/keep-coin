@@ -169,7 +169,7 @@ export function CompactTransactionFilters({
           <button
             type="button"
             onClick={clearFilters}
-            className="pressable flex h-10 items-center gap-2 rounded-xl border border-ink-200 bg-white/80 px-3.5 text-sm font-medium text-ink-600 backdrop-blur hover:border-ink-300 hover:text-ink-700 dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-300 dark:hover:border-white/30 dark:hover:text-ink-100"
+            className="pressable flex h-10 shrink-0 items-center gap-2 rounded-xl border border-ink-200 bg-white/80 px-3.5 text-sm font-medium text-ink-600 backdrop-blur hover:border-ink-300 hover:text-ink-700 dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-300 dark:hover:border-white/30 dark:hover:text-ink-100"
           >
             <svg
               viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ export function CompactTransactionFilters({
             >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
-            {t('common.clear')}
+            <span className="hidden sm:inline">{t('common.clear')}</span>
           </button>
         )}
       </div>

@@ -103,11 +103,11 @@ export function FamilyPage() {
               placeholder={t('family.invitePlaceholder')}
               className="h-11 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
             />
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as AccountRole)}
-                className="h-11 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+                className="h-11 w-full min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
               >
                 <option value="viewer">{t('roles.viewer')}</option>
                 <option value="editor">{t('roles.editor')}</option>
@@ -117,6 +117,7 @@ export function FamilyPage() {
                 loading={inviteMutation.isPending}
                 disabled={!email.trim()}
                 onClick={() => inviteMutation.mutate()}
+                className="w-full shrink-0 sm:w-auto"
               >
                 {t('common.send')}
               </Button>
@@ -154,7 +155,7 @@ export function FamilyPage() {
                         <p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{m.display_name || m.email}</p>
                         <p className="truncate text-xs text-ink-400">{m.email}</p>
                       </div>
-                      <Button variant="outline" size="sm" loading={leaveMutation.isPending} onClick={() => leaveMutation.mutate(m.user_id)}>
+                      <Button variant="outline" size="sm" loading={leaveMutation.isPending} onClick={() => leaveMutation.mutate(m.user_id)} className="shrink-0 whitespace-nowrap">
                         {t('family.leave')}
                       </Button>
                     </Card>
@@ -177,17 +178,17 @@ export function FamilyPage() {
                           <p className="truncate text-xs text-ink-400">{m.email}</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row">
                         <select
                           value={m.role}
                           onChange={(e) => roleMutation.mutate({ userId: m.user_id, role: e.target.value as AccountRole })}
                           disabled={roleMutation.isPending}
-                          className="h-10 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+                          className="h-10 w-full min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
                         >
                           <option value="viewer">{t('roles.viewer')}</option>
                           <option value="editor">{t('roles.editor')}</option>
                         </select>
-                        <Button variant="ghost" loading={removeMutation.isPending} onClick={() => removeMutation.mutate(m.user_id)}>
+                        <Button variant="ghost" loading={removeMutation.isPending} onClick={() => removeMutation.mutate(m.user_id)} className="w-full shrink-0 whitespace-nowrap sm:w-auto">
                           {t('family.removeMember')}
                         </Button>
                       </div>

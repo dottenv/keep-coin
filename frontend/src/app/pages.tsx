@@ -46,6 +46,9 @@ export const AllTransactionsPage = lazyNamed(loaders.allTransactions, 'AllTransa
 export const TransactionDetailPage = lazyNamed(loaders.transactionDetail, 'TransactionDetailPage')
 export const AddTransactionPage = lazyNamed(loaders.addTransaction, 'AddTransactionPage')
 export const CategoriesPage = lazyNamed(loaders.categories, 'CategoriesPage')
+export const PlannerPage = lazyNamed(loaders.planner, 'PlannerPage')
+export const BudgetFormPage = lazyNamed(loaders.budgetForm, 'BudgetFormPage')
+export const GoalFormPage = lazyNamed(loaders.goalForm, 'GoalFormPage')
 
 /** Предзагружает все чанки страниц (без ожидания). */
 export function prefetchAllRoutes(): void {

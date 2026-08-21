@@ -18,6 +18,9 @@ import {
   RegisterPage,
   StatsPage,
   TransactionDetailPage,
+  PlannerPage,
+  BudgetFormPage,
+  GoalFormPage,
 } from './pages'
 
 function BootScreen({ label }: { label?: string }) {
@@ -64,6 +67,11 @@ export function AppRoutes() {
         <Route path="/invites" element={<Protected><InvitesPage /></Protected>} />
         <Route path="/family" element={<Protected><FamilyPage /></Protected>} />
         <Route path="/categories" element={<Protected><CategoriesPage /></Protected>} />
+        <Route path="/planner" element={<Protected><PlannerPage /></Protected>} />
+        <Route path="/planner/budgets/new" element={<Protected><BudgetFormPage /></Protected>} />
+        <Route path="/planner/budgets/:id/edit" element={<Protected><BudgetFormPage /></Protected>} />
+        <Route path="/planner/goals/new" element={<Protected><GoalFormPage /></Protected>} />
+        <Route path="/planner/goals/:id/edit" element={<Protected><GoalFormPage /></Protected>} />
         <Route path="/stats" element={<Protected><StatsPage /></Protected>} />
         <Route path="/transactions" element={<Protected><AllTransactionsPage /></Protected>} />
         <Route path="/transactions/:id" element={<Protected><TransactionDetailPage /></Protected>} />

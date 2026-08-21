@@ -25,6 +25,7 @@ export function AllTransactionsPage() {
       account_id: filters.account_id,
     }),
     staleTime: 30_000,
+    placeholderData: (prev) => prev,
   })
 
   // Получаем уникальные категории из транзакций
@@ -56,6 +57,10 @@ export function AllTransactionsPage() {
     setFilters(newFilters)
   }
 
+  // Первичная загрузка — скелетоны; повторная выборка (поиск/фильтры) — спиннер.
+  const initialLoading = all.isPending || accounts.isPending
+  const refetching = all.isFetching && !all.isPending
+
   return (
     <AppShell>
       <PageHeader title={t('transactions.allTitle')} />
@@ -70,7 +75,8 @@ export function AllTransactionsPage() {
       <TransactionsList
         transactions={filteredTransactions}
         accounts={accounts.data}
-        loading={all.isPending || accounts.isPending}
+        loading={initialLoading}
+        refetching={refetching}
       />
       
       {filteredTransactions?.length === 0 && !all.isPending && (

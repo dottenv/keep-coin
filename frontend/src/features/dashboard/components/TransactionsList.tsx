@@ -6,6 +6,7 @@ import type { Transaction } from '@/features/transactions/api'
 import { categoryView } from '@/features/categories/api'
 import { formatShortDate, formatSignedMoney, isToday, formatMoney } from '@/lib/format'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { LoadingBlock } from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 
 const TYPE_ICONS: Record<Transaction['type'], string> = {
@@ -25,10 +26,12 @@ export function TransactionsList({
   transactions,
   accounts,
   loading,
+  refetching,
 }: {
   transactions?: Transaction[]
   accounts?: Account[]
   loading?: boolean
+  refetching?: boolean
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -41,6 +44,10 @@ export function TransactionsList({
         ))}
       </div>
     )
+  }
+
+  if (refetching) {
+    return <LoadingBlock label={t('common.loading')} />
   }
 
   if (transactions.length === 0) {

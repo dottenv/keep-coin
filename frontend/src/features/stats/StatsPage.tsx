@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Card } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
+import { Spinner } from '@/components/ui/Spinner'
 import { DonutChart, type DonutSegment } from '@/components/ui/DonutChart'
 import { fetchSummary, type SummaryFilters, type TransactionType } from '@/features/transactions/api'
 import { fetchAccounts, type Account } from '@/features/accounts/api'
@@ -26,7 +27,7 @@ const PALETTE = [
   '#94a3b8',
 ]
 
-const CURRENCY = 'RUB'
+const currency = 'RUB'
 
 const BUILTIN: Record<TransactionType, string[]> = {
   income: ['salary', 'freelance', 'gift', 'other'],
@@ -43,6 +44,7 @@ export function StatsPage() {
   const summary = useQuery({
     queryKey: ['transactions', 'summary', filters],
     queryFn: () => fetchSummary(filters),
+    placeholderData: (prev) => prev,
   })
 
   const allCategories: Category[] = categoriesQ.data ?? []
@@ -77,8 +79,8 @@ export function StatsPage() {
 
   const statCards = [
     { key: 'net', label: t('stats.net'), tone: net >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600', sub: t('stats.allTime') },
-    { key: 'income', label: t('stats.income'), tone: 'text-emerald-600 dark:text-emerald-400', sub: `${t('stats.month')} · ${formatMoney(data.month_income, CURRENCY)}` },
-    { key: 'expense', label: t('stats.expense'), tone: 'text-ink-800 dark:text-ink-100', sub: `${t('stats.month')} · ${formatMoney(data.month_expense, CURRENCY)}` },
+    { key: 'income', label: t('stats.income'), tone: 'text-emerald-600 dark:text-emerald-400', sub: `${t('stats.month')} · ${formatMoney(data.month_income, currency)}` },
+    { key: 'expense', label: t('stats.expense'), tone: 'text-ink-800 dark:text-ink-100', sub: `${t('stats.month')} · ${formatMoney(data.month_expense, currency)}` },
   ]
 
   const hasFilters = Object.values(filters).some(Boolean)
@@ -86,6 +88,12 @@ export function StatsPage() {
   return (
     <AppShell>
       <PageHeader title={t('nav.stats')} />
+
+      {summary.isFetching && summary.data ? (
+        <div className="flex justify-center pb-1">
+          <Spinner size="sm" className="border-brand-200 border-t-brand-500" />
+        </div>
+      ) : null}
 
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
@@ -99,7 +107,7 @@ export function StatsPage() {
               <p className={cn('mt-1 text-lg font-bold tabular-nums tracking-tight', card.tone)}>
                 <AnimatedNumber
                   value={card.key === 'income' ? data.total_income : card.key === 'expense' ? data.total_expense : net}
-                  format={(v) => formatMoney(v, CURRENCY)}
+                  format={(v) => formatMoney(v, currency)}
                 />
               </p>
               <p className="mt-1 text-[0.7rem] text-ink-300 dark:text-ink-400">{card.sub}</p>
@@ -180,7 +188,7 @@ export function StatsPage() {
               <DonutChart
                 segments={donutSegments}
                 className="ultra:[filter:drop-shadow(0_0_10px_rgba(16,185,129,0.35))]"
-                centerValue={<AnimatedNumber value={data.total_expense} format={(v) => formatMoney(v, CURRENCY)} className="text-2xl" />}
+                centerValue={<AnimatedNumber value={data.total_expense} format={(v) => formatMoney(v, currency)} className="text-2xl" />}
                 centerLabel={t('stats.expense')}
               />
               <ul className="w-full space-y-2">
@@ -192,7 +200,7 @@ export function StatsPage() {
                       <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                       <span className="min-w-0 flex-1 truncate text-xs font-medium text-ink-700 dark:text-ink-200">{view.label}</span>
                       <span className="text-xs font-bold tabular-nums text-ink-800 dark:text-ink-100">{Math.round((item.total / data.total_expense) * 100)}%</span>
-                      <span className="w-24 shrink-0 text-right text-xs font-semibold tabular-nums text-ink-500 dark:text-ink-400">{formatMoney(item.total, CURRENCY)}</span>
+                      <span className="w-24 shrink-0 text-right text-xs font-semibold tabular-nums text-ink-500 dark:text-ink-400">{formatMoney(item.total, currency)}</span>
                     </li>
                   )
                 })}

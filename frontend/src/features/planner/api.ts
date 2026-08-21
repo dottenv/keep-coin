@@ -8,6 +8,7 @@ export interface Budget {
   name: string
   amount: number
   period: BudgetPeriod
+  kind: 'expense' | 'income'
   category: string | null
   currency: string
   is_active: boolean
@@ -26,6 +27,7 @@ export interface CreateBudgetPayload {
   amount: number
   account_id?: string | null
   period?: BudgetPeriod
+  kind?: 'expense' | 'income'
   category?: string | null
   is_active?: boolean
 }
@@ -61,6 +63,23 @@ export interface CreateGoalPayload {
 
 export type UpdateGoalPayload = Partial<CreateGoalPayload>
 
+export interface CategoryPlan {
+  category: string
+  kind: 'expense' | 'income'
+  planned: number
+  actual: number
+  pct: number
+}
+
+export interface PlannerInsight {
+  tone: 'warn' | 'good' | 'info'
+  code: string
+  count?: number
+  amount?: number
+  have?: number
+  need?: number
+}
+
 export interface PlannerOverview {
   month: string
   currency: string
@@ -68,12 +87,17 @@ export interface PlannerOverview {
   month_expense: number
   planned_income: number
   planned_expenses: number
+  planned_net: number
+  actual_net: number
+  net_diff: number
   savings_target: number
   need_to_earn: number
   current_balance: number
   projected_balance: number
   daily_budget: number
   days_left: number
+  category_breakdown: CategoryPlan[]
+  insights: PlannerInsight[]
   budgets: Budget[]
   goals: SavingsGoal[]
 }

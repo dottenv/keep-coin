@@ -22,7 +22,10 @@ import { notifyError } from '@/features/auth/errors'
 
 const PERIODS: BudgetPeriod[] = ['month', 'week', 'year']
 
-const BUILTIN_EXPENSE = ['food', 'transport', 'shopping', 'entertainment', 'home', 'other'] as const
+const BUILTIN_BY_KIND = {
+  expense: ['food', 'transport', 'shopping', 'entertainment', 'home', 'other'],
+  income: ['salary', 'freelance', 'gift', 'other'],
+} as const
 
 /** Форма бюджета: создание и редактирование (/planner/budgets/new и /:id/edit). */
 export function BudgetFormPage() {
@@ -42,6 +45,7 @@ export function BudgetFormPage() {
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
   const [period, setPeriod] = useState<BudgetPeriod>('month')
+  const [kind, setKind] = useState<'expense' | 'income'>('expense')
   const [accountId, setAccountId] = useState('')
   const [category, setCategory] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -51,6 +55,7 @@ export function BudgetFormPage() {
     setName(editing.name)
     setAmount(String(editing.amount))
     setPeriod(editing.period)
+    setKind(editing.kind ?? 'expense')
     setAccountId(editing.account_id ?? '')
     setCategory(editing.category ?? '')
   }, [editing])
@@ -81,13 +86,14 @@ export function BudgetFormPage() {
     onError: (error) => notifyError(error, toast),
   })
 
-  const expenseCategories = useMemo(() => {
-    const custom: Category[] = (categories.data ?? []).filter((c) => c.kind === 'expense')
+  const categoryOptions = useMemo(() => {
+    const custom: Category[] = (categories.data ?? []).filter((c) => c.kind === kind)
+    const builtins = BUILTIN_BY_KIND[kind]
     return [
-      ...BUILTIN_EXPENSE.map((code) => ({ value: code, label: t(`categories.${code}`) })),
+      ...builtins.map((code) => ({ value: code, label: t(`categories.${code}`) })),
       ...custom.map((c) => ({ value: c.name, label: c.name })),
     ]
-  }, [categories.data, t])
+  }, [categories.data, kind, t])
 
   const editableAccounts = useMemo(
     () => (accounts.data ?? []).filter((a) => a.role === 'owner' || a.role === 'editor'),
@@ -110,6 +116,7 @@ export function BudgetFormPage() {
       name: name.trim(),
       amount: parsedAmount,
       period,
+      kind,
       account_id: accountId || null,
       category: category || null,
     })
@@ -148,9 +155,21 @@ export function BudgetFormPage() {
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              hint={t('budgets.amountHint')}
+              hint={kind === 'income' ? t('budgets.amountHintIncome') : t('budgets.amountHint')}
               error={fieldErrors.amount}
             />
+
+            <Select
+              label={t('budgets.kind')}
+              value={kind}
+              onChange={(e) => {
+                setKind(e.target.value as 'expense' | 'income')
+                setCategory('')
+              }}
+            >
+              <option value="expense">{t('budgets.kindExpense')}</option>
+              <option value="income">{t('budgets.kindIncome')}</option>
+            </Select>
 
             <Select
               label={t('budgets.period')}
@@ -176,7 +195,7 @@ export function BudgetFormPage() {
 
             <Select label={t('budgets.category')} value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="">{t('budgets.categoryNone')}</option>
-              {expenseCategories.map((option) => (
+              {categoryOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
