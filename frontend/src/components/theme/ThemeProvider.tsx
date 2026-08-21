@@ -8,15 +8,17 @@ import {
   type ReactNode,
 } from 'react'
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'ultra'
 
 const STORAGE_KEY = 'keep-coin-theme'
+
+const ORDER: Theme[] = ['light', 'dark', 'ultra']
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'light' || saved === 'dark') return saved
+    if (saved === 'light' || saved === 'dark' || saved === 'ultra') return saved
   } catch {
     /* ignore */
   }
@@ -26,7 +28,7 @@ function getInitialTheme(): Theme {
 interface ThemeContextValue {
   theme: Theme
   setTheme: (theme: Theme) => void
-  toggleTheme: () => void
+  cycleTheme: () => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -37,7 +39,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement
-    root.classList.toggle('dark', theme === 'dark')
+    // Ultra — это тёмная тема с неоновыми акцентами, поэтому `dark` нужен всегда.
+    root.classList.toggle('dark', theme !== 'light')
+    root.classList.toggle('ultra', theme === 'ultra')
     try {
       localStorage.setItem(STORAGE_KEY, theme)
     } catch {
@@ -46,12 +50,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme])
 
   const setTheme = useCallback((next: Theme) => setThemeState(next), [])
-  const toggleTheme = useCallback(
-    () => setThemeState((current) => (current === 'dark' ? 'light' : 'dark')),
+  const cycleTheme = useCallback(
+    () => setThemeState((current) => ORDER[(ORDER.indexOf(current) + 1) % ORDER.length]),
     [],
   )
 
-  const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme, setTheme, toggleTheme])
+  const value = useMemo(() => ({ theme, setTheme, cycleTheme }), [theme, setTheme, cycleTheme])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

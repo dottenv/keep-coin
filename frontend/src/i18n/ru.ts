@@ -321,6 +321,10 @@ export const ru = {
     expense: 'Расход',
   },
   theme: {
+    title: 'Тема оформления',
+    light: 'Светлая',
+    dark: 'Тёмная',
+    ultra: 'Неон',
     toggleToDark: 'Включить тёмную тему',
     toggleToLight: 'Включить светлую тему',
   },

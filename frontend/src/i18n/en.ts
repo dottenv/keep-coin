@@ -323,8 +323,12 @@ export const en: Ru = {
     expense: 'Expense',
   },
   theme: {
-    toggleToDark: 'Switch to dark theme',
-    toggleToLight: 'Switch to light theme',
+    title: 'Theme',
+    light: 'Light',
+    dark: 'Dark',
+    ultra: 'Neon',
+    toggleToDark: 'Enable dark theme',
+    toggleToLight: 'Enable light theme',
   },
   profile: {
     title: 'Profile settings',

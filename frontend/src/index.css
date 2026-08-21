@@ -13,7 +13,33 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-ink-50 text-ink-900 antialiased dark:bg-ink-950 dark:text-ink-100;
+    @apply text-ink-900 antialiased;
+    /* Светлая тема: мягкий, но насыщенный градиент вместо плоского серого. */
+    color: #0f172a;
+    background-color: #eef2f7;
+    background-image: linear-gradient(
+      155deg,
+      #ecfdf5 0%,
+      #f1f5f9 42%,
+      #eff6ff 78%,
+      #faf5ff 100%
+    );
+    background-attachment: fixed;
+  }
+  .dark body {
+    @apply bg-ink-950 text-ink-100;
+    background-image: none;
+  }
+  /* Ultra: тёмная «жидкая» тема с неоновыми переливами. */
+  .ultra body {
+    color: #e2e8f0;
+    background-color: #05010f;
+    background-image:
+      radial-gradient(120% 80% at 15% 0%, rgba(124, 58, 237, 0.30) 0%, transparent 55%),
+      radial-gradient(120% 90% at 90% 10%, rgba(34, 211, 238, 0.20) 0%, transparent 50%),
+      radial-gradient(120% 100% at 50% 100%, rgba(236, 72, 153, 0.18) 0%, transparent 55%),
+      linear-gradient(160deg, #0a0418 0%, #060312 100%);
+    background-attachment: fixed;
   }
   ::selection {
     @apply bg-brand-500/30;
@@ -37,6 +63,41 @@
   .glass-chip {
     @apply border border-white/60 bg-white/60 backdrop-blur-lg
       dark:border-white/10 dark:bg-white/[0.07];
+  }
+
+  /* Светлая тема: чуть больше контраста и «свежести» у стекла. */
+  .glass-surface,
+  .glass-card {
+    @apply shadow-[0_10px_34px_rgba(15,23,42,0.10)];
+  }
+
+  /* Ultra — «жидкое стекло»: сильнее прозрачность, неоновые контуры и свечение. */
+  .ultra .glass-surface,
+  .ultra .glass-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(168, 85, 247, 0.28);
+    backdrop-filter: blur(26px) saturate(160%);
+    -webkit-backdrop-filter: blur(26px) saturate(160%);
+    box-shadow:
+      0 0 0 1px rgba(168, 85, 247, 0.12),
+      0 10px 40px rgba(124, 58, 237, 0.22),
+      0 0 34px rgba(34, 211, 238, 0.10);
+  }
+  .ultra .glass-chip {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(168, 85, 247, 0.32);
+    box-shadow: 0 0 18px rgba(124, 58, 237, 0.20);
+  }
+
+  /* Неоновое свечение для акцентных (брендовых градиентных) элементов. */
+  .ultra .from-brand-500,
+  .ultra .from-brand-400 {
+    box-shadow:
+      0 0 22px rgba(16, 185, 129, 0.45),
+      0 0 42px rgba(34, 211, 238, 0.20);
+  }
+  .ultra .text-brand-600 {
+    text-shadow: 0 0 14px rgba(52, 211, 153, 0.55);
   }
 }
 
