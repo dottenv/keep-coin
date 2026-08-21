@@ -71,85 +71,52 @@
     @apply shadow-[0_10px_34px_rgba(15,23,42,0.10)];
   }
 
-  /* Ultra — «жидкое стекло»: сильнее прозрачность, неоновые контуры и свечение
-     в акцентной зелёной гамме (бренд). */
+  /* Ultra — «жидкое стекло»: максимальная прозрачность и объём за счёт
+     яркого блика по верхнему краю (эффект линзы). Никакого неонового свечения. */
   .ultra .glass-surface,
   .ultra .glass-card {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(16, 185, 129, 0.30);
-    backdrop-filter: blur(26px) saturate(160%);
-    -webkit-backdrop-filter: blur(26px) saturate(160%);
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     box-shadow:
-      0 0 0 1px rgba(16, 185, 129, 0.12),
-      0 10px 40px rgba(16, 185, 129, 0.20),
-      0 0 34px rgba(45, 212, 191, 0.12);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.50),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      inset 0 -22px 48px -30px rgba(255, 255, 255, 0.45),
+      0 18px 50px rgba(2, 6, 23, 0.45);
   }
   .ultra .glass-chip {
-    background-color: rgba(255, 255, 255, 0.06);
-    border-color: rgba(16, 185, 129, 0.32);
-    box-shadow: 0 0 18px rgba(16, 185, 129, 0.18);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+      0 10px 30px rgba(2, 6, 23, 0.40);
   }
 
-  /* Неоновое свечение для всех градиентных кнопок/действий.
-     Каждый акцентный цвет светится в своей гамме — логично и равномерно. */
-  .ultra .from-brand-500,
-  .ultra .from-brand-400,
-  .ultra .from-emerald-500,
-  .ultra .from-emerald-400 {
-    box-shadow:
-      0 0 22px rgba(16, 185, 129, 0.50),
-      0 0 42px rgba(20, 184, 166, 0.22);
-  }
-  .ultra .from-rose-500 {
-    box-shadow:
-      0 0 22px rgba(244, 63, 94, 0.45),
-      0 0 42px rgba(251, 113, 133, 0.20);
-  }
-  .ultra .from-sky-500 {
-    box-shadow:
-      0 0 22px rgba(14, 165, 233, 0.45),
-      0 0 42px rgba(56, 189, 248, 0.20);
-  }
-  .ultra .from-red-500,
-  .ultra .from-red-600 {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.42);
-  }
-  .ultra .text-brand-600 {
-    text-shadow: 0 0 14px rgba(52, 211, 153, 0.55);
-  }
-
-  /* Равномерное неоновое фокус-кольцо для любых кнопок в Ultra. */
+  /* Фокус без неона: чёткое, но спокойное кольцо. */
   .ultra button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.30);
+    outline: 2px solid rgba(255, 255, 255, 0.55);
+    outline-offset: 2px;
   }
 
-  /* Поля ввода/выбора в Ultra — неоновая рамка и свечение при фокусе. */
+  /* Поля ввода/выбора в Ultra — спокойная светлая рамка, без свечения. */
   .ultra input,
   .ultra select,
   .ultra textarea {
-    border-color: rgba(16, 185, 129, 0.22);
+    border-color: rgba(255, 255, 255, 0.22);
   }
   .ultra input:focus,
   .ultra select:focus,
   .ultra textarea:focus {
-    border-color: rgba(52, 211, 153, 0.65);
-    box-shadow:
-      0 0 0 3px rgba(16, 185, 129, 0.14),
-      0 0 16px rgba(16, 185, 129, 0.25);
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16);
     outline: none;
   }
 
-  /* Опасные (красные) кнопки тоже получают неоновое свечение в Ultra. */
-  .ultra .bg-red-500,
-  .ultra .bg-red-600 {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.40);
-  }
-
-  /* Активный пункт нижней навигации светится в Ultra. */
+  /* Активный пункт нижней навигации — мягкая подсветка без свечения. */
   .ultra nav a.bg-brand-50\/80,
   .ultra nav a[class*='bg-brand-50'] {
-    box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
   }
 }
 
