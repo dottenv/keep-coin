@@ -27,8 +27,6 @@ const PALETTE = [
   '#94a3b8',
 ]
 
-const currency = 'RUB'
-
 const BUILTIN: Record<TransactionType, string[]> = {
   income: ['salary', 'freelance', 'gift', 'other'],
   expense: ['food', 'transport', 'shopping', 'entertainment', 'home', 'other'],
