@@ -243,6 +243,10 @@ def test_planner_overview_numbers(client):
         json={"name": "Транспорт", "amount": 5000, "category": "transport"},
     )
     client.post(
+        "/api/budgets",
+        json={"name": "Зарплата", "amount": 60000, "kind": "income"},
+    )
+    client.post(
         "/api/goals",
         json={"name": "Подушка", "target_amount": 100000, "monthly_contribution": 5000},
     )
@@ -255,15 +259,16 @@ def test_planner_overview_numbers(client):
     assert overview["currency"] == "RUB"
     assert overview["month_income"] == 0  # в текущем месяце доходов ещё не было
     assert overview["planned_expenses"] == 20000  # 15000 + 5000
+    assert overview["planned_income"] == 60000  # явный план дохода
     assert overview["savings_target"] == 5000
-    assert overview["month_expense"] == 2000
-    assert overview["planned_income"] == 50_000  # средний доход за 2 полных месяца
     assert overview["need_to_earn"] == 0  # доход покрывает план и накопления
+    assert overview["unassigned"] == 35000  # 60000 - 20000 - 5000
+    assert overview["has_plan"] is True
     # Баланс счёта: открытие 10000 + 2 дохода по 50000 − расход 2000
     assert overview["current_balance"] == 108000
-    assert overview["projected_balance"] == 108000 + 50_000 - 20000 - 5000
+    assert overview["projected_balance"] == 108000 + 60000 - 20000 - 5000
     assert overview["days_left"] > 0
-    assert len(overview["budgets"]) == 2
+    assert len(overview["budgets"]) == 3
     assert len(overview["goals"]) == 1
     assert overview["budgets"][0]["spent"] == 2000
     assert overview["goals"][0]["pct"] == 0.0

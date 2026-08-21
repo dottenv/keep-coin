@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from app.errors import ApiError
 from app.extensions import db
 from app.models import Category
