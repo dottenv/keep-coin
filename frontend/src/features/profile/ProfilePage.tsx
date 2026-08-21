@@ -95,7 +95,7 @@ function ThemeOption({
         className={cn(
           'block rounded-xl border px-3 pb-5 pt-2',
           theme === 'ultra'
-            ? 'border-fuchsia-400/30 bg-[#0b0418]'
+            ? 'border-emerald-400/30 bg-[#06231a]'
             : isDark
               ? 'border-white/10 bg-ink-900'
               : 'border-ink-100 bg-ink-50',
@@ -106,7 +106,7 @@ function ThemeOption({
           <span
             className={cn(
               'h-1.5 w-3/4 rounded-full',
-              theme === 'ultra' ? 'bg-fuchsia-400/40' : isDark ? 'bg-white/25' : 'bg-ink-300',
+              theme === 'ultra' ? 'bg-emerald-400/40' : isDark ? 'bg-white/25' : 'bg-ink-300',
             )}
           />
         </span>
@@ -316,12 +316,6 @@ export function ProfilePage() {
                   active={theme === 'dark'}
                   onSelect={() => setTheme('dark')}
                   label={t('profile.themeDark')}
-                />
-                <ThemeOption
-                  theme="ultra"
-                  active={theme === 'ultra'}
-                  onSelect={() => setTheme('ultra')}
-                  label={t('profile.themeUltra')}
                 />
               </div>
             </div>
