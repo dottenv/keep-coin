@@ -275,98 +275,100 @@ class TransactionService:
         filters = filters or {}
         _ensure_phrases_synced(user_id)
         accessible = accessible_account_ids(user_id)
-        base = Transaction.query.filter(
+        q = Transaction.query.filter(
             or_(
                 Transaction.account_id.in_(accessible),
                 Transaction.to_account_id.in_(accessible),
             )
         )
-
         if filters.get("account_id"):
-            base = base.filter(Transaction.account_id == filters["account_id"])
+            q = q.filter(Transaction.account_id == filters["account_id"])
         if filters.get("type"):
-            base = base.filter(Transaction.type == filters["type"])
+            q = q.filter(Transaction.type == filters["type"])
         if filters.get("date_from"):
-            base = base.filter(Transaction.date >= filters["date_from"])
+            q = q.filter(Transaction.date >= filters["date_from"])
         if filters.get("date_to"):
-            base = base.filter(Transaction.date <= filters["date_to"])
+            q = q.filter(Transaction.date <= filters["date_to"])
 
-        total_income = _sum(base.filter(Transaction.type == "income"))
-        total_expense = _sum(base.filter(Transaction.type == "expense"))
+        # Все метрики считаются из одного отфильтрованного набора, поэтому
+        # каждый виджет страницы «Статистика» подчиняется активным фильтрам.
+        txns = q.all()
+
+        total_income = float(sum(t.amount for t in txns if t.type == "income"))
+        total_expense = float(sum(t.amount for t in txns if t.type == "expense"))
 
         now = datetime.now(timezone.utc)
         month_start = date(now.year, now.month, 1)
-        month = base.filter(
-            Transaction.date >= month_start, Transaction.date < _next_month(month_start)
+        nm = _next_month(month_start)
+        month_income = float(
+            sum(t.amount for t in txns if t.type == "income" and month_start <= t.date < nm)
         )
-        month_income = _sum(month.filter(Transaction.type == "income"))
-        month_expense = _sum(month.filter(Transaction.type == "expense"))
-
-        expense_q = base.filter(Transaction.type == "expense")
-        if filters.get("category"):
-            # Совпадение по коду (встроенная) или по названию (кастомная).
-            expense_q = expense_q.filter(Transaction.category == filters["category"])
-
-        expense_by_category = (
-            expense_q.outerjoin(Category, Transaction.category_id == Category.id)
-            .with_entities(
-                Transaction.category,
-                Transaction.category_id,
-                Category.name,
-                Category.color,
-                Category.icon,
-                func.sum(Transaction.amount).label("total"),
-            )
-            .group_by(
-                Transaction.category,
-                Transaction.category_id,
-                Category.name,
-                Category.color,
-                Category.icon,
-            )
-            .order_by(func.sum(Transaction.amount).desc())
-            .all()
+        month_expense = float(
+            sum(t.amount for t in txns if t.type == "expense" and month_start <= t.date < nm)
         )
 
-        expense_by_account = (
-            base.filter(Transaction.type == "expense")
-            .join(Account, Transaction.account_id == Account.id)
-            .with_entities(
-                Transaction.account_id,
-                Account.name,
-                func.sum(Transaction.amount).label("total"),
-            )
-            .group_by(Transaction.account_id, Account.name)
-            .order_by(func.sum(Transaction.amount).desc())
-            .all()
-        )
+        category_filter = filters.get("category")
+        cats_by_id = {c.id: c for c in Category.query.filter_by(user_id=user_id).all()}
+        cat_totals: dict[tuple, float] = defaultdict(float)
+        for t in txns:
+            if t.type != "expense":
+                continue
+            if category_filter and t.category != category_filter:
+                continue
+            cat_totals[(t.category_id, t.category)] += float(t.amount)
 
-        return {
-            "total_income": float(total_income),
-            "total_expense": float(total_expense),
-            "month_income": float(month_income),
-            "month_expense": float(month_expense),
-            "expense_by_category": [
+        expense_by_category = []
+        for (cat_id, code), total in cat_totals.items():
+            name = color = icon = None
+            if cat_id and cat_id in cats_by_id:
+                c = cats_by_id[cat_id]
+                name, color, icon = c.name, c.color, c.icon
+            expense_by_category.append(
                 {
                     "category": code,
                     "category_id": str(cat_id) if cat_id else None,
-                    "name": name if name else None,
-                    "color": color if color else None,
-                    "icon": icon if icon else None,
-                    "total": float(total),
+                    "name": name,
+                    "color": color,
+                    "icon": icon,
+                    "total": total,
                 }
-                for code, cat_id, name, color, icon, total in expense_by_category
-            ],
-            "expense_by_account": [
-                {
-                    "account_id": str(account_id),
-                    "account_name": name,
-                    "total": float(total),
-                }
-                for account_id, name, total in expense_by_account
-            ],
-            "recurring_count": len(_recurring_titles(user_id)),
-            "monthly": _monthly_history(user_id, accessible),
+            )
+        expense_by_category.sort(key=lambda x: x["total"], reverse=True)
+
+        # Динамика по месяцам: последние 6 календарных месяцев от текущего.
+        buckets = []
+        y, m = now.year, now.month
+        for _ in range(6):
+            buckets.append(date(y, m, 1))
+            m -= 1
+            if m == 0:
+                m = 12
+                y -= 1
+        buckets.reverse()
+        monthly = []
+        for ms in buckets:
+            nxt = _next_month(ms)
+            inc = sum(t.amount for t in txns if t.type == "income" and ms <= t.date < nxt)
+            exp = sum(t.amount for t in txns if t.type == "expense" and ms <= t.date < nxt)
+            monthly.append(
+                {"month": ms.strftime("%Y-%m"), "income": float(inc), "expense": float(exp)}
+            )
+
+        titles = _recurring_titles(user_id)
+        recurring_titles = {
+            (t.title or "").strip().lower()
+            for t in txns
+            if (t.title or "").strip().lower() in titles
+        }
+
+        return {
+            "total_income": total_income,
+            "total_expense": total_expense,
+            "month_income": month_income,
+            "month_expense": month_expense,
+            "expense_by_category": expense_by_category,
+            "recurring_count": len(recurring_titles),
+            "monthly": monthly,
         }
 
 

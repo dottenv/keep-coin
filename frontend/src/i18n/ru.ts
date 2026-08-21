@@ -62,6 +62,7 @@ export const ru = {
     plan: 'План',
     stats: 'Статистика',
     accounts: 'Счета',
+    categories: 'Категории',
     profile: 'Профиль',
   },
   dashboard: {

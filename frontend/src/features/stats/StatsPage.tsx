@@ -107,73 +107,68 @@ export function StatsPage() {
           ))}
         </div>
 
-        <Card className="p-4 animate-fade-in-up">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div>
-              <span className="mb-1.5 block text-xs font-medium text-ink-600 dark:text-ink-300">{t('transactions.type')}</span>
-              <select
-                value={filters.type ?? ''}
-                onChange={(e) => setFilters({ ...filters, type: (e.target.value || undefined) as TransactionType | undefined })}
-                className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-              >
-                <option value="">{t('common.allTypes')}</option>
-                <option value="income">{t('transactions.income')}</option>
-                <option value="expense">{t('transactions.expense')}</option>
-                <option value="transfer">{t('transactions.transfer')}</option>
-              </select>
-            </div>
+        <Card className="p-3 animate-fade-in-up">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <select
+              value={filters.type ?? ''}
+              onChange={(e) => setFilters({ ...filters, type: (e.target.value || undefined) as TransactionType | undefined })}
+              className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+            >
+              <option value="">{t('transactions.type')}</option>
+              <option value="income">{t('transactions.income')}</option>
+              <option value="expense">{t('transactions.expense')}</option>
+              <option value="transfer">{t('transactions.transfer')}</option>
+            </select>
 
-            <div>
-              <span className="mb-1.5 block text-xs font-medium text-ink-600 dark:text-ink-300">{t('transactions.category')}</span>
-              <select
-                value={filters.category ?? ''}
-                onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
-                className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-              >
-                <option value="">{t('common.allCategories')}</option>
-                {categoryOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={filters.category ?? ''}
+              onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
+              className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+            >
+              <option value="">{t('transactions.category')}</option>
+              {categoryOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
 
-            <div>
-              <span className="mb-1.5 block text-xs font-medium text-ink-600 dark:text-ink-300">{t('transactions.account')}</span>
-              <select
-                value={filters.account_id ?? ''}
-                onChange={(e) => setFilters({ ...filters, account_id: e.target.value || undefined })}
-                className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-              >
-                <option value="">{t('common.allAccounts')}</option>
-                {accounts.data?.map((a: Account) => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <span className="mb-1.5 block text-xs font-medium text-ink-600 dark:text-ink-300">{t('transactions.period')}</span>
-              <div className="flex gap-1.5">
-                <input
-                  type="date"
-                  value={filters.date_from ?? ''}
-                  onChange={(e) => setFilters({ ...filters, date_from: e.target.value || undefined })}
-                  className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-2 text-xs outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-                />
-                <input
-                  type="date"
-                  value={filters.date_to ?? ''}
-                  onChange={(e) => setFilters({ ...filters, date_to: e.target.value || undefined })}
-                  className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-2 text-xs outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-                />
-              </div>
-            </div>
+            <select
+              value={filters.account_id ?? ''}
+              onChange={(e) => setFilters({ ...filters, account_id: e.target.value || undefined })}
+              className="h-10 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+            >
+              <option value="">{t('transactions.account')}</option>
+              {accounts.data?.map((a: Account) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
           </div>
-          {hasFilters ? (
-            <button type="button" onClick={() => setFilters({})} className="mt-3 text-xs font-semibold text-brand-600 dark:text-brand-400">
-              {t('common.clearFilters')}
-            </button>
-          ) : null}
+
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <input
+                type="date"
+                value={filters.date_from ?? ''}
+                onChange={(e) => setFilters({ ...filters, date_from: e.target.value || undefined })}
+                className="h-10 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+              />
+              <span className="shrink-0 text-xs text-ink-400">–</span>
+              <input
+                type="date"
+                value={filters.date_to ?? ''}
+                onChange={(e) => setFilters({ ...filters, date_to: e.target.value || undefined })}
+                className="h-10 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+              />
+            </div>
+            {hasFilters ? (
+              <button
+                type="button"
+                onClick={() => setFilters({})}
+                className="h-10 shrink-0 rounded-xl border border-ink-200 px-3 text-xs font-semibold text-ink-500 transition-colors hover:bg-ink-50 dark:border-white/15 dark:text-ink-300 dark:hover:bg-white/[0.06]"
+              >
+                {t('common.clearFilters')}
+              </button>
+            ) : null}
+          </div>
         </Card>
 
         <Card className="p-5 animate-fade-in-up" style={{ animationDelay: '180ms' }}>

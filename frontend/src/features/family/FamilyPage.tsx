@@ -94,32 +94,33 @@ export function FamilyPage() {
         <Card className="p-4 animate-fade-in-up">
           <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{t('family.invite')}</p>
           <p className="mt-0.5 text-xs text-ink-400">{t('family.manageHint')}</p>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 space-y-2">
             <input
               type="email"
               inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t('family.invitePlaceholder')}
-              className="h-10 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+              className="h-11 w-full rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
             />
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as AccountRole)}
-              className="h-10 rounded-xl border border-ink-200 bg-white/80 px-2 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-            >
-              <option value="viewer">{t('roles.viewer')}</option>
-              <option value="editor">{t('roles.editor')}</option>
-            </select>
-            <Button
-              variant="primary"
-              size="sm"
-              loading={inviteMutation.isPending}
-              disabled={!email.trim()}
-              onClick={() => inviteMutation.mutate()}
-            >
-              {t('common.send')}
-            </Button>
+            <div className="flex gap-2">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as AccountRole)}
+                className="h-11 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+              >
+                <option value="viewer">{t('roles.viewer')}</option>
+                <option value="editor">{t('roles.editor')}</option>
+              </select>
+              <Button
+                variant="primary"
+                loading={inviteMutation.isPending}
+                disabled={!email.trim()}
+                onClick={() => inviteMutation.mutate()}
+              >
+                {t('common.send')}
+              </Button>
+            </div>
           </div>
         </Card>
 
@@ -168,24 +169,28 @@ export function FamilyPage() {
                 <p className="px-1 pb-2 text-xs text-ink-400">{t('family.yourAccountsHint')}</p>
                 <div className="space-y-3">
                   {youShare.map((m, index) => (
-                    <Card key={m.user_id} className="flex items-center gap-3 p-4 animate-fade-in-up" style={{ animationDelay: `${index * 60}ms` }}>
-                      <Avatar name={m.display_name} email={m.email} />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{m.display_name || m.email}</p>
-                        <p className="truncate text-xs text-ink-400">{m.email}</p>
+                    <Card key={m.user_id} className="space-y-3 p-4 animate-fade-in-up" style={{ animationDelay: `${index * 60}ms` }}>
+                      <div className="flex items-center gap-3">
+                        <Avatar name={m.display_name} email={m.email} />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">{m.display_name || m.email}</p>
+                          <p className="truncate text-xs text-ink-400">{m.email}</p>
+                        </div>
                       </div>
-                      <select
-                        value={m.role}
-                        onChange={(e) => roleMutation.mutate({ userId: m.user_id, role: e.target.value as AccountRole })}
-                        disabled={roleMutation.isPending}
-                        className="h-9 rounded-xl border border-ink-200 bg-white/80 px-2 text-xs outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
-                      >
-                        <option value="viewer">{t('roles.viewer')}</option>
-                        <option value="editor">{t('roles.editor')}</option>
-                      </select>
-                      <Button variant="ghost" size="sm" loading={removeMutation.isPending} onClick={() => removeMutation.mutate(m.user_id)}>
-                        {t('family.removeMember')}
-                      </Button>
+                      <div className="flex gap-2">
+                        <select
+                          value={m.role}
+                          onChange={(e) => roleMutation.mutate({ userId: m.user_id, role: e.target.value as AccountRole })}
+                          disabled={roleMutation.isPending}
+                          className="h-10 min-w-0 flex-1 rounded-xl border border-ink-200 bg-white/80 px-3 text-sm outline-none dark:border-white/15 dark:bg-white/[0.07] dark:text-ink-100"
+                        >
+                          <option value="viewer">{t('roles.viewer')}</option>
+                          <option value="editor">{t('roles.editor')}</option>
+                        </select>
+                        <Button variant="ghost" loading={removeMutation.isPending} onClick={() => removeMutation.mutate(m.user_id)}>
+                          {t('family.removeMember')}
+                        </Button>
+                      </div>
                     </Card>
                   ))}
                 </div>

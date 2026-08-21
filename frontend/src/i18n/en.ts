@@ -64,6 +64,7 @@ export const en: Ru = {
     plan: 'Plan',
     stats: 'Stats',
     accounts: 'Accounts',
+    categories: 'Categories',
     profile: 'Profile',
   },
   dashboard: {
