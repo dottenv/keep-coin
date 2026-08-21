@@ -264,6 +264,7 @@ export const ru = {
     noAccountsForTxSub: 'Операции привязываются к счетам',
     recurring: 'Повторяется',
     recurringNote: 'Встречается в разных месяцах — похоже на регулярный платёж',
+    by: 'от {{name}}',
     noTitleHint: 'Название не требуется — это перевод между счетами',
     searchPlaceholder: 'Поиск по названию...',
     period: 'Период',
