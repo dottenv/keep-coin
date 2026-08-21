@@ -14,7 +14,7 @@ import { cn } from '@/lib/cn'
 
 const HERO_ACCENT = 'bg-gradient-to-br from-ink-900 via-ink-800 to-brand-900'
 
-function catLabel(t: (k: string, fallback?: string) => string, category: string | null): string {
+function catLabel(t: (k: string) => string, category: string | null): string {
   if (!category) return t('planner.allCategories')
   const label = t(`categories.${category}`)
   return label.startsWith('categories.') ? category : label
