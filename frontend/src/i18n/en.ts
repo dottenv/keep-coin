@@ -266,6 +266,7 @@ export const en: Ru = {
     noAccountsForTxSub: 'Transactions are linked to accounts',
     recurring: 'Recurring',
     recurringNote: 'Appears across different months — looks like a regular payment',
+    by: 'by {{name}}',
     noTitleHint: 'No title needed — this is a transfer between accounts',
     searchPlaceholder: 'Search by title...',
     period: 'Period',
