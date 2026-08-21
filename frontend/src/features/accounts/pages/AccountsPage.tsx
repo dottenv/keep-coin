@@ -117,7 +117,41 @@ export function AccountsPage() {
             <path d="M9 18l6-6-6-6" />
           </svg>
         </Link>
-      ) : null}
+        ) : null}
+
+        <Link
+          to="/family"
+          className="glass-chip mb-3 flex items-center gap-3 rounded-2xl p-3.5 text-brand-800 animate-fade-in dark:text-brand-200"
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/80 text-brand-500 dark:bg-white/10 dark:text-brand-400">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </span>
+          <span className="flex-1 text-sm font-semibold">{t('family.title')}</span>
+          <span className="text-xs text-brand-500/80 dark:text-brand-300/80">{t('family.subtitle')}</span>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4 text-brand-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
 
       <div className="space-y-3">
         {accounts.isPending ? (

@@ -25,7 +25,7 @@ export function PrefetchProvider({ children }: { children: ReactNode }) {
     const preload: Array<Promise<unknown>> = [
       queryClient.prefetchQuery({ queryKey: ['accounts'], queryFn: fetchAccounts }),
       queryClient.prefetchQuery({ queryKey: ['categories'], queryFn: fetchCategories }),
-      queryClient.prefetchQuery({ queryKey: ['transactions', 'summary'], queryFn: fetchSummary }),
+      queryClient.prefetchQuery({ queryKey: ['transactions', 'summary'], queryFn: () => fetchSummary() }),
     ]
     void Promise.allSettled(preload)
   }, [status, queryClient])

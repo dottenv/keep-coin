@@ -95,7 +95,9 @@ export function InvitesPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink-800 dark:text-ink-100">
-                    {t('invites.toAccount', { name: invite.account_name })}
+                    {invite.scope === 'family'
+                      ? t('invites.familyScope')
+                      : t('invites.toAccount', { name: invite.account_name })}
                   </p>
                   <p className="mt-0.5 truncate text-xs text-ink-400">
                     {t('invites.from', { name: invite.inviter_name })} ·{' '}

@@ -21,7 +21,7 @@ import {
   type UpdateTransactionPayload,
 } from '@/features/transactions/api'
 import { fetchAccounts } from '@/features/accounts/api'
-import { fetchCategories, CATEGORY_ICON_PATHS, type Category } from '@/features/categories/api'
+import { fetchCategories, type Category } from '@/features/categories/api'
 import { notifyError } from '@/features/auth/errors'
 import { todayISO } from '@/lib/format'
 import { cn } from '@/lib/cn'

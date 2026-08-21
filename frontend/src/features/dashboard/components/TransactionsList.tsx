@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import type { Account } from '@/features/accounts/api'
 import type { Transaction } from '@/features/transactions/api'
-import { categoryView, CATEGORY_ICON_PATHS } from '@/features/categories/api'
+import { categoryView } from '@/features/categories/api'
 import { formatShortDate, formatSignedMoney, isToday, formatMoney } from '@/lib/format'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/cn'

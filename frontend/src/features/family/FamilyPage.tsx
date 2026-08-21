@@ -17,7 +17,6 @@ import {
   type AccountRole,
   type FamilyMember,
 } from '@/features/accounts/api'
-import { cn } from '@/lib/cn'
 
 function Avatar({ name, email }: { name: string; email: string }) {
   const initial = (name || email || '?').trim().charAt(0).toUpperCase()
