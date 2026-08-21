@@ -147,6 +147,9 @@ export function TransactionDetailPage() {
     label: t('transactions.date'),
     value: formatLongDate(data.date),
   })
+  if (!data.is_own && data.author_name) {
+    rows.push({ label: t('transactions.author'), value: data.author_name })
+  }
 
   return (
     <AppShell>
