@@ -32,16 +32,28 @@ class MemberOutSchema(Schema):
     email = fields.Str()
     role = fields.Str()
     is_owner = fields.Bool()
+    relation = fields.Str()  # 'owner' — вы делитесь, 'member' — вам открыли
 
 
 class InviteOutSchema(Schema):
     id = fields.UUID()
-    account_id = fields.UUID()
+    account_id = fields.UUID(allow_none=True)
+    scope = fields.Str()
     account_name = fields.Str()
     inviter_name = fields.Str()
     role = fields.Str()
     created_at = fields.DateTime()
 
 
+class FamilyMemberOutSchema(Schema):
+    user_id = fields.UUID()
+    display_name = fields.Str()
+    email = fields.Str()
+    role = fields.Str()
+    is_owner = fields.Bool()
+    relation = fields.Str()
+
+
 member_out_schema = MemberOutSchema()
 invite_out_schema = InviteOutSchema()
+family_member_out_schema = FamilyMemberOutSchema()

@@ -129,6 +129,16 @@ class TransactionOutSchema(Schema):
     title = fields.Str()
     category = fields.Str()
     category_id = fields.UUID(allow_none=True)
+    category_color = fields.Function(
+        lambda obj: getattr(obj.category_obj, "color", None)
+        if getattr(obj, "category_obj", None)
+        else None
+    )
+    category_icon = fields.Function(
+        lambda obj: getattr(obj.category_obj, "icon", None)
+        if getattr(obj, "category_obj", None)
+        else None
+    )
     amount = fields.Float()
     currency = fields.Str()
     date = fields.Date()

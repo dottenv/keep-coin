@@ -26,6 +26,7 @@ from app.schemas.planner import (
 from app.schemas.sharing import (
     MemberInviteSchema,
     RoleUpdateSchema,
+    family_member_out_schema,
     invite_out_schema,
     member_out_schema,
 )
@@ -54,4 +55,5 @@ __all__ = [
     "RoleUpdateSchema",
     "invite_out_schema",
     "member_out_schema",
+    "family_member_out_schema",
 ]

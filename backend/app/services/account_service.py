@@ -9,6 +9,7 @@ from app.models import (
     AccountInvite,
     AccountMember,
     Budget,
+    FamilyMember,
     SavingsGoal,
     Transaction,
     User,
@@ -89,6 +90,19 @@ class AccountService:
             currency=currency,
         )
         db.session.add(account)
+        db.session.flush()  # нужен id для авто-шаринга семье
+
+        # Семейный доступ: новый счёт сразу открывается всем участникам семьи.
+        family = FamilyMember.query.filter_by(owner_id=user_id).all()
+        for fm in family:
+            db.session.add(
+                AccountMember(
+                    account_id=account.id,
+                    user_id=fm.member_id,
+                    role=fm.role,
+                    invited_by=user_id,
+                )
+            )
         db.session.commit()
         return account
 

@@ -9,6 +9,9 @@ from app.models.user import TimestampMixin
 
 INVITE_STATUSES = ("pending", "accepted", "revoked")
 INVITE_TTL_DAYS = 7
+# scope: 'account' — шаринг конкретного счёта (устаревший режим),
+#        'family'  — семейный доступ ко всем счетам владельца.
+INVITE_SCOPES = ("account", "family")
 
 
 def _default_token() -> str:
@@ -32,8 +35,10 @@ class AccountInvite(TimestampMixin, db.Model):
 
     id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
     account_id = db.Column(
-        db.Uuid, db.ForeignKey("accounts.id"), nullable=False, index=True
+        db.Uuid, db.ForeignKey("accounts.id"), nullable=True, index=True
     )
+    # 'account' — доступ к одному счёту; 'family' — ко всем счетам владельца.
+    scope = db.Column(db.String(10), nullable=False, default="account")
     email = db.Column(db.String(255), nullable=False, index=True)
     role = db.Column(db.String(10), nullable=False, default="editor")
     token = db.Column(db.String(64), unique=True, nullable=False, default=_default_token)

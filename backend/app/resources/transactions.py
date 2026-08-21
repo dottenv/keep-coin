@@ -58,7 +58,22 @@ def suggestions():
 @bp.get("/summary")
 @jwt_required()
 def summary():
-    return jsonify(TransactionService.summary(current_user.id))
+    filters = {
+        "account_id": request.args.get("account_id") or None,
+        "category": request.args.get("category") or None,
+        "type": request.args.get("type") or None,
+        "date_from": request.args.get("date_from") or None,
+        "date_to": request.args.get("date_to") or None,
+    }
+    return jsonify(TransactionService.summary(current_user.id, filters))
+
+
+@bp.get("/category-suggestion")
+@jwt_required()
+def category_suggestion():
+    q = request.args.get("q") or ""
+    result = TransactionService.suggest_category(current_user.id, q)
+    return jsonify(category=result)
 
 
 @bp.post("")

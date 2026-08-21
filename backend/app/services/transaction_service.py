@@ -5,7 +5,8 @@ from sqlalchemy import func, or_
 
 from app.errors import ApiError
 from app.extensions import db
-from app.models import Account, RecurringPhrase, Transaction, User
+from app.models import Account, Category, CategoryKeyword, RecurringPhrase, Transaction, User
+from app.models.category_keyword import normalize_keyword
 from app.services.access_service import accessible_account_ids, account_role, require_role
 from app.services.account_service import AccountService
 from app.services.category_service import CategoryService
@@ -111,6 +112,7 @@ class TransactionService:
             date=data["date"],
         )
         _apply_category(user_id, tx, data)
+        _learn_keyword(user_id, tx)
         db.session.add(tx)
         db.session.commit()
 
@@ -179,6 +181,7 @@ class TransactionService:
 
         if "category" in data or "category_id" in data:
             _apply_category(user_id, tx, data)
+            _learn_keyword(user_id, tx)
 
         db.session.commit()
         _sync_phrases(user_id)
@@ -245,8 +248,31 @@ class TransactionService:
         return sorted(agg.values(), key=lambda x: -x["count"])[:limit]
 
     @staticmethod
-    def summary(user_id) -> dict:
-        """Агрегаты для страницы «Статистика» (по счетам с доступом)."""
+    def suggest_category(user_id, title: str | None):
+        """Подсказать категорию по запомненному ключевому слову (названию)."""
+        kw = normalize_keyword(title or "")
+        if not kw:
+            return None
+        ck = CategoryKeyword.query.filter_by(user_id=user_id, keyword=kw).first()
+        if ck is None or ck.category is None:
+            return None
+        c = ck.category
+        return {
+            "id": str(c.id),
+            "name": c.name,
+            "color": c.color,
+            "icon": c.icon,
+            "kind": c.kind,
+        }
+
+    @staticmethod
+    def summary(user_id, filters: dict | None = None) -> dict:
+        """Агрегаты для страницы «Статистика» (по счетам с доступом).
+
+        Поддерживает фильтры: account_id, category (код/название), type,
+        date_from, date_to.
+        """
+        filters = filters or {}
         _ensure_phrases_synced(user_id)
         accessible = accessible_account_ids(user_id)
         base = Transaction.query.filter(
@@ -255,6 +281,15 @@ class TransactionService:
                 Transaction.to_account_id.in_(accessible),
             )
         )
+
+        if filters.get("account_id"):
+            base = base.filter(Transaction.account_id == filters["account_id"])
+        if filters.get("type"):
+            base = base.filter(Transaction.type == filters["type"])
+        if filters.get("date_from"):
+            base = base.filter(Transaction.date >= filters["date_from"])
+        if filters.get("date_to"):
+            base = base.filter(Transaction.date <= filters["date_to"])
 
         total_income = _sum(base.filter(Transaction.type == "income"))
         total_expense = _sum(base.filter(Transaction.type == "expense"))
@@ -267,12 +302,28 @@ class TransactionService:
         month_income = _sum(month.filter(Transaction.type == "income"))
         month_expense = _sum(month.filter(Transaction.type == "expense"))
 
+        expense_q = base.filter(Transaction.type == "expense")
+        if filters.get("category"):
+            # Совпадение по коду (встроенная) или по названию (кастомная).
+            expense_q = expense_q.filter(Transaction.category == filters["category"])
+
         expense_by_category = (
-            base.filter(Transaction.type == "expense")
+            expense_q.outerjoin(Category, Transaction.category_id == Category.id)
             .with_entities(
-                Transaction.category, func.sum(Transaction.amount).label("total")
+                Transaction.category,
+                Transaction.category_id,
+                Category.name,
+                Category.color,
+                Category.icon,
+                func.sum(Transaction.amount).label("total"),
             )
-            .group_by(Transaction.category)
+            .group_by(
+                Transaction.category,
+                Transaction.category_id,
+                Category.name,
+                Category.color,
+                Category.icon,
+            )
             .order_by(func.sum(Transaction.amount).desc())
             .all()
         )
@@ -296,7 +347,15 @@ class TransactionService:
             "month_income": float(month_income),
             "month_expense": float(month_expense),
             "expense_by_category": [
-                {"category": code, "total": float(total)} for code, total in expense_by_category
+                {
+                    "category": code,
+                    "category_id": str(cat_id) if cat_id else None,
+                    "name": name if name else None,
+                    "color": color if color else None,
+                    "icon": icon if icon else None,
+                    "total": float(total),
+                }
+                for code, cat_id, name, color, icon, total in expense_by_category
             ],
             "expense_by_account": [
                 {
@@ -307,7 +366,7 @@ class TransactionService:
                 for account_id, name, total in expense_by_account
             ],
             "recurring_count": len(_recurring_titles(user_id)),
-            "monthly": _monthly_history(user_id),
+            "monthly": _monthly_history(user_id, accessible),
         }
 
 
@@ -327,6 +386,22 @@ def _apply_category(user_id, tx: Transaction, data: dict) -> None:
     else:
         tx.category_id = None
         tx.category = "other"
+
+
+def _learn_keyword(user_id, tx: Transaction) -> None:
+    """Запоминает сопоставление «название → категория» для автоподстановки."""
+    if not tx.category_id:
+        return
+    kw = normalize_keyword(tx.title)
+    if not kw:
+        return
+    existing = CategoryKeyword.query.filter_by(user_id=user_id, keyword=kw).first()
+    if existing is None:
+        db.session.add(
+            CategoryKeyword(user_id=user_id, keyword=kw, category_id=tx.category_id)
+        )
+    elif existing.category_id != tx.category_id:
+        existing.category_id = tx.category_id
 
 
 def _tx_title(tx) -> str:
@@ -441,11 +516,18 @@ def _ensure_phrases_synced(user_id) -> None:
         _sync_phrases(user_id)
 
 
-def _monthly_history(user_id) -> list:
+def _monthly_history(user_id, accessible: set | None = None) -> list:
     """Доходы/расходы по месяцам (последние 6, включая текущий)."""
+    if accessible is None:
+        accessible = accessible_account_ids(user_id)
     rows = (
         db.session.query(Transaction.type, Transaction.amount, Transaction.date)
-        .filter(Transaction.user_id == user_id)
+        .filter(
+            or_(
+                Transaction.account_id.in_(accessible),
+                Transaction.to_account_id.in_(accessible),
+            )
+        )
         .all()
     )
 
