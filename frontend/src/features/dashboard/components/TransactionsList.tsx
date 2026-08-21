@@ -133,6 +133,7 @@ export function TransactionsList({
                     ) : null}
                     {account ? ` · ${account.name}` : ''}
                     {tx.type === 'transfer' && toAccount ? ` → ${toAccount.name}` : ''}
+                    {!tx.is_own && tx.author_name ? ` · ${t('transactions.by', { name: tx.author_name })}` : ''}
                   </p>
                 </div>
 
