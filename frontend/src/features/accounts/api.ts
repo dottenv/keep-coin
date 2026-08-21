@@ -47,6 +47,11 @@ export async function deleteAccount(id: string): Promise<{ ok: boolean }> {
   return api<{ ok: boolean }>(`/api/accounts/${id}`, { method: 'DELETE' })
 }
 
+/** Сохраняет персональный порядок счетов (массив id от первого к последнему). */
+export async function reorderAccounts(order: string[]): Promise<{ ok: boolean }> {
+  return api<{ ok: boolean }>('/api/accounts/order', { method: 'PUT', json: { order } })
+}
+
 export interface AccountMember {
   user_id: string
   display_name: string

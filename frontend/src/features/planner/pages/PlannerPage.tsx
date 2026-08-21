@@ -286,7 +286,7 @@ function Insights({ insights, currency }: { insights: PlannerInsight[]; currency
   )
 }
 
-function insightText(t: (k: string) => string, ins: PlannerInsight, currency: string): { title: string; desc: string } {
+function insightText(t: (k: string, opts?: Record<string, unknown>) => string, ins: PlannerInsight, currency: string): { title: string; desc: string } {
   switch (ins.code) {
     case 'budget_over':
       return {
@@ -351,7 +351,6 @@ function BudgetSection({
   emptyText: string
   emptyCta: string
 }) {
-  const { t } = useTranslation()
   return (
     <section className="space-y-3 animate-fade-in-up">
       <SectionHeaderLink title={title} to={to} label={cta} />

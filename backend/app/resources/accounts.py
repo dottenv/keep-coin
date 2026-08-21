@@ -20,6 +20,15 @@ def list_accounts():
     return jsonify(accounts=[account_out_schema.dump(a) for a in accounts])
 
 
+@bp.put("/order")
+@jwt_required()
+def reorder_accounts():
+    data = request.get_json(silent=True) or {}
+    order = data.get("order") or []
+    AccountService.reorder(current_user.id, [str(x) for x in order])
+    return jsonify(ok=True)
+
+
 @bp.post("")
 @jwt_required()
 def create_account():

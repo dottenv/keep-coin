@@ -1,11 +1,19 @@
+import { useTheme } from '@/components/theme/ThemeProvider'
+import { cn } from '@/lib/cn'
+
 /**
- * Фоновые цветные пятна для стеклянных поверхностей (light/dark/ultra).
- * Прозрачные «шары» размыты и плавно дрейфуют — стекло под ними
- * приобретает глубину. Вызывается один раз на уровне всего приложения.
+ * Фон приложения: медленно переливающийся градиент-«аврора» в акцентных
+ * тонах активной темы + размытые цветные пятна, добавляющие стеклу глубину.
+ * Вызывается один раз на уровне всего приложения (в AppShell).
  */
 export function GlassBackground() {
+  const { theme } = useTheme()
+  const aurora = theme === 'ultra' ? 'aurora-ultra' : theme === 'dark' ? 'aurora-dark' : 'aurora-light'
+
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div className={cn('aurora absolute inset-0', aurora)} />
+
       <div className="absolute -left-28 -top-28 h-96 w-96 rounded-full bg-brand-400/30 blur-3xl animate-float dark:bg-brand-500/20 ultra:bg-emerald-400/35 ultra:blur-[80px]" />
       <div
         className="absolute -bottom-36 -right-20 h-[28rem] w-[28rem] rounded-full bg-brand-300/25 blur-3xl animate-float dark:bg-emerald-400/10 ultra:bg-teal-400/25 ultra:blur-[90px]"

@@ -1,6 +1,7 @@
 from app.models.account import Account
 from app.models.account_invite import AccountInvite
 from app.models.account_member import AccountMember
+from app.models.account_order import AccountOrder
 from app.models.budget import BUDGET_PERIODS, Budget
 from app.models.category import Category
 from app.models.category_keyword import CategoryKeyword
@@ -19,6 +20,7 @@ __all__ = [
     "Account",
     "AccountInvite",
     "AccountMember",
+    "AccountOrder",
     "BUDGET_PERIODS",
     "Budget",
     "Category",

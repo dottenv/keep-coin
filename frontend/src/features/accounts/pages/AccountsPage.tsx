@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -9,6 +10,7 @@ import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import {
   fetchAccounts,
   fetchPendingInvites,
+  reorderAccounts,
   type Account,
 } from '@/features/accounts/api'
 import { formatMoney } from '@/lib/format'
@@ -33,8 +35,53 @@ export function AccountsPage() {
   const { t } = useTranslation()
   const accounts = useQuery({ queryKey: ['accounts'], queryFn: fetchAccounts })
   const invites = useQuery({ queryKey: ['invites'], queryFn: fetchPendingInvites })
+  const queryClient = useQueryClient()
 
   const pendingCount = invites.data?.length ?? 0
+
+  // Локальный порядок для drag-and-drop; синхронизируется с сервером,
+  // когда нет активного перетаскивания.
+  const [list, setList] = useState<Account[]>([])
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const draggingRef = useRef(false)
+
+  useEffect(() => {
+    if (!draggingRef.current && accounts.data) setList(accounts.data)
+  }, [accounts.data])
+
+  const reorderMutation = useMutation({
+    mutationFn: (order: string[]) => reorderAccounts(order),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] }),
+  })
+
+  const persist = (next: Account[]) => reorderMutation.mutate(next.map((a) => a.id))
+
+  const move = (from: number, to: number) => {
+    if (from === to) return
+    const arr = [...list]
+    const [item] = arr.splice(from, 1)
+    arr.splice(to, 0, item)
+    setList(arr)
+    persist(arr)
+  }
+
+  const onDragStart = (index: number) => {
+    draggingRef.current = true
+    setDragIndex(index)
+  }
+  const onDragEnter = (index: number) => {
+    if (dragIndex === null || index === dragIndex) return
+    const arr = [...list]
+    const [item] = arr.splice(dragIndex, 1)
+    arr.splice(index, 0, item)
+    setList(arr)
+    setDragIndex(index)
+  }
+  const onDragEnd = () => {
+    draggingRef.current = false
+    if (dragIndex !== null) persist(list)
+    setDragIndex(null)
+  }
 
   return (
     <AppShell>
@@ -167,12 +214,35 @@ export function AccountsPage() {
             </span>
           </Link>
         ) : (
-          accounts.data?.map((account, index) => (
+          list.map((account, index) => (
             <div
               key={account.id}
-              className="glass-card flex items-center gap-4 p-4 animate-fade-in-up"
-              style={{ animationDelay: `${index * 50}ms` }}
+              draggable
+              onDragStart={() => onDragStart(index)}
+              onDragEnter={() => onDragEnter(index)}
+              onDragEnd={onDragEnd}
+              className={cn(
+                'glass-card flex items-center gap-3 p-4 transition-shadow',
+                dragIndex === index
+                  ? 'ring-2 ring-brand-400/60 ultra:ring-emerald-400/60'
+                  : '',
+              )}
             >
+              {/* Ручка перетаскивания (десктоп) */}
+              <span
+                className="hidden h-9 w-6 shrink-0 cursor-grab items-center justify-center text-ink-300 active:cursor-grabbing dark:text-ink-500 sm:flex"
+                aria-hidden
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                  <circle cx="9" cy="6" r="1.6" />
+                  <circle cx="15" cy="6" r="1.6" />
+                  <circle cx="9" cy="12" r="1.6" />
+                  <circle cx="15" cy="12" r="1.6" />
+                  <circle cx="9" cy="18" r="1.6" />
+                  <circle cx="15" cy="18" r="1.6" />
+                </svg>
+              </span>
+
               <span
                 className={cn(
                   'grid h-12 w-12 shrink-0 place-items-center rounded-2xl',
@@ -217,6 +287,33 @@ export function AccountsPage() {
                   format={(v) => formatMoney(v, account.currency)}
                 />
               </p>
+
+              {/* Управление порядком (мобайл / доступность) */}
+              <div className="flex shrink-0 flex-col gap-1">
+                <button
+                  type="button"
+                  aria-label={t('accounts.moveUp')}
+                  disabled={index === 0}
+                  onClick={() => move(index, index - 1)}
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-400 transition-colors hover:bg-ink-50 hover:text-brand-600 disabled:opacity-30 dark:text-ink-400 dark:hover:bg-white/[0.06] dark:hover:text-brand-400"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 15l6-6 6 6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  aria-label={t('accounts.moveDown')}
+                  disabled={index === list.length - 1}
+                  onClick={() => move(index, index + 1)}
+                  className="grid h-8 w-8 place-items-center rounded-xl text-ink-400 transition-colors hover:bg-ink-50 hover:text-brand-600 disabled:opacity-30 dark:text-ink-400 dark:hover:bg-white/[0.06] dark:hover:text-brand-400"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+
               {account.role === 'owner' ? (
                 <Link
                   to={`/accounts/${account.id}/members`}

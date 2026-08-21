@@ -179,6 +179,66 @@
     }
   }
 
+  /* Медленное парение цветных пятен фона */
+  @keyframes float {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -16px, 0);
+    }
+  }
+  .animate-float {
+    animation: float 7s ease-in-out infinite;
+  }
+
+  /* Динамичный переливающийся градиент-«аврора» в акцентных тонах темы */
+  @keyframes auroraShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  .aurora {
+    background-size: 280% 280%;
+    animation: auroraShift 24s ease-in-out infinite;
+  }
+  .aurora-light {
+    background-image: linear-gradient(
+      120deg,
+      #e0e7ff,
+      #ecfeff,
+      #f0fdf4,
+      #faf5ff,
+      #e0e7ff
+    );
+  }
+  .aurora-dark {
+    background-image: linear-gradient(
+      120deg,
+      #0b1220,
+      #0b1f3a,
+      #0c2a2a,
+      #1b1840,
+      #0b1220
+    );
+  }
+  .aurora-ultra {
+    background-image: linear-gradient(
+      120deg,
+      #022c22,
+      #03312b,
+      #064e3b,
+      #0f172a,
+      #022c22
+    );
+  }
+
   /* Плавное нажатие для интерактивных элементов */
   .pressable {
     @apply transition-[transform,box-shadow] duration-150 ease-out;

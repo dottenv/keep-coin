@@ -1,4 +1,5 @@
 from decimal import Decimal
+import uuid
 
 from sqlalchemy import select
 
@@ -8,6 +9,7 @@ from app.models import (
     Account,
     AccountInvite,
     AccountMember,
+    AccountOrder,
     Budget,
     FamilyMember,
     SavingsGoal,
@@ -21,15 +23,22 @@ from app.services.access_service import account_role, require_role
 class AccountService:
     @staticmethod
     def list(user_id) -> list[Account]:
-        """Свои + общие счёта. На объекты вешаются `_role`, `_is_shared`, `_owner_name`."""
+        """Свои + общие счёта, отсортированные по персональному порядку юзера.
+        На объекты вешаются `_role`, `_is_shared`, `_owner_name`."""
+        from sqlalchemy import func
+
         member_ids = select(AccountMember.account_id).where(
             AccountMember.user_id == user_id
         )
         accounts = (
-            Account.query.filter(
+            Account.query.outerjoin(
+                AccountOrder,
+                (AccountOrder.account_id == Account.id) & (AccountOrder.user_id == user_id),
+            )
+            .filter(
                 (Account.user_id == user_id) | (Account.id.in_(member_ids))
             )
-            .order_by(Account.created_at.asc())
+            .order_by(func.coalesce(AccountOrder.position, 1_000_000), Account.created_at.asc())
             .all()
         )
 
@@ -58,6 +67,36 @@ class AccountService:
                 acc._is_shared = True
                 acc._owner_name = owners.get(acc.user_id)
         return accounts
+
+    @staticmethod
+    def reorder(user_id, account_ids: list[str]) -> None:
+        """Сохраняет персональный порядок счетов для пользователя.
+
+        Принимает полный упорядоченный список id счетов, видимых пользователю.
+        Игнорируются счета, к которым у пользователя нет доступа.
+        """
+        accessible: set[uuid.UUID] = set()
+        for raw in account_ids:
+            try:
+                aid = uuid.UUID(str(raw))
+            except (ValueError, AttributeError):
+                continue
+            if account_role(user_id, aid) is not None:
+                accessible.add(aid)
+
+        for index, raw in enumerate(account_ids):
+            try:
+                aid = uuid.UUID(str(raw))
+            except (ValueError, AttributeError):
+                continue
+            if aid not in accessible:
+                continue
+            row = db.session.get(AccountOrder, (user_id, aid))
+            if row is None:
+                db.session.add(AccountOrder(user_id=user_id, account_id=aid, position=index))
+            else:
+                row.position = index
+        db.session.commit()
 
     @staticmethod
     def get_accessible(user_id, account_id) -> Account:
