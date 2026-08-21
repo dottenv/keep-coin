@@ -162,19 +162,37 @@ def _build_insights(
     month_income,
     month_expense,
     planned_income,
+    planned_expenses,
     savings_target,
+    unassigned,
     daily_budget,
+    has_plan,
     has_income_plan,
     has_expense_plan,
 ) -> list[dict]:
     """Простые рекомендации по плану. Тексты — на фронте по коду."""
     insights: list[dict] = []
+
+    if not has_plan:
+        return [{"tone": "info", "code": "no_plan"}]
+
     over = [b for b in monthly_expense if b._spent > b.amount]
     if over:
         amount = sum(b._spent - b.amount for b in over)
         insights.append(
             {"tone": "warn", "code": "budget_over", "count": len(over), "amount": float(amount)}
         )
+
+    # Нулевое бюджетирование: распределено больше дохода.
+    if unassigned < -0.01:
+        insights.append(
+            {"tone": "warn", "code": "over_allocated", "amount": round(-unassigned, 2)}
+        )
+    elif unassigned > 0.01 and planned_income > 0:
+        insights.append({"tone": "info", "code": "money_unassigned", "amount": round(unassigned, 2)})
+
+    if has_expense_plan and not has_income_plan:
+        insights.append({"tone": "info", "code": "no_income_plan"})
 
     actual_net = month_income - month_expense
     if savings_target > 0:
@@ -192,9 +210,6 @@ def _build_insights(
 
     if actual_net < 0:
         insights.append({"tone": "warn", "code": "negative_net", "amount": round(-actual_net, 2)})
-
-    if has_expense_plan and not has_income_plan:
-        insights.append({"tone": "info", "code": "no_income_plan"})
 
     if has_expense_plan and daily_budget <= 0 and not over:
         insights.append({"tone": "warn", "code": "no_daily_left"})
@@ -390,9 +405,10 @@ class PlannerService:
                 "projected_balance": 0.0,
                 "daily_budget": 0.0,
                 "days_left": 0,
-                "planned_net": 0.0,
+                "unassigned": 0.0,
                 "actual_net": 0.0,
                 "net_diff": 0.0,
+                "has_plan": False,
                 "category_breakdown": [],
                 "insights": [],
                 "budgets": [],
@@ -421,27 +437,25 @@ class PlannerService:
         month_income = _month_sum("income")
         month_expense = _month_sum("expense")
 
-        avg_income, avg_expense = _avg_monthly_totals(user_id, accessible, primary)
-
         budgets = PlannerService.list_budgets(user_id)
         active_budgets = [b for b in budgets if b.is_active and b.currency == primary]
         monthly_budgets = [b for b in active_budgets if b.period == "month"]
         monthly_expense = [b for b in monthly_budgets if b.kind == "expense"]
         monthly_income = [b for b in monthly_budgets if b.kind == "income"]
 
+        # План = явные планы пользователя (без неявных средних).
         planned_expenses = float(sum((b.amount for b in monthly_expense), 0) or 0)
-        if not planned_expenses:
-            planned_expenses = avg_expense
-
         planned_income = float(sum((b.amount for b in monthly_income), 0) or 0)
-        if not planned_income:
-            planned_income = avg_income
 
         goals = PlannerService.list_goals(user_id)
         active_goals = [g for g in goals if g.is_active and g.currency == primary]
         savings_target = sum(g._needed_per_month for g in active_goals)
 
-        need_to_earn = max(0.0, planned_expenses + savings_target - planned_income)
+        has_plan = bool(planned_income or planned_expenses or savings_target)
+
+        # Нулевое бюджетирование: доход минус распределено (расходы + накопления).
+        unassigned = planned_income - planned_expenses - savings_target
+        need_to_earn = max(0.0, -unassigned)
 
         current_balance = float(
             sum(
@@ -470,17 +484,20 @@ class PlannerService:
                 }
             )
 
-        planned_net = planned_income - planned_expenses - savings_target
+        unassigned = planned_income - planned_expenses - savings_target
         actual_net = month_income - month_expense
-        net_diff = actual_net - planned_net
+        net_diff = actual_net - unassigned
 
         insights = _build_insights(
             monthly_expense=monthly_expense,
             month_income=month_income,
             month_expense=month_expense,
             planned_income=planned_income,
+            planned_expenses=planned_expenses,
             savings_target=savings_target,
+            unassigned=unassigned,
             daily_budget=daily_budget,
+            has_plan=has_plan,
             has_income_plan=bool(monthly_income),
             has_expense_plan=bool(monthly_expense),
         )
@@ -492,7 +509,7 @@ class PlannerService:
             "month_expense": month_expense,
             "planned_income": round(planned_income, 2),
             "planned_expenses": round(planned_expenses, 2),
-            "planned_net": round(planned_net, 2),
+            "unassigned": round(unassigned, 2),
             "actual_net": round(actual_net, 2),
             "net_diff": round(net_diff, 2),
             "savings_target": round(savings_target, 2),
@@ -501,6 +518,7 @@ class PlannerService:
             "projected_balance": round(projected_balance, 2),
             "daily_budget": daily_budget,
             "days_left": days_left,
+            "has_plan": has_plan,
             "category_breakdown": category_breakdown,
             "insights": insights,
             "budgets": budgets,
