@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, validate
 
 from app.models.account import DEFAULT_CURRENCY
-from app.models.budget import BUDGET_PERIODS
+from app.models.budget import BUDGET_KINDS, BUDGET_PERIODS
 
 BUDGET_NAME_REQUIRED = "budget_name_required"
 BUDGET_NAME_LONG = "budget_name_long"
@@ -10,6 +10,7 @@ BUDGET_AMOUNT_INVALID = "budget_amount_invalid"
 INVALID_BUDGET_PERIOD = "invalid_budget_period"
 INVALID_BUDGET_CATEGORY = "invalid_budget_category"
 INVALID_BUDGET_CURRENCY = "invalid_budget_currency"
+INVALID_BUDGET_KIND = "invalid_budget_kind"
 GOAL_NAME_REQUIRED = "goal_name_required"
 GOAL_NAME_LONG = "goal_name_long"
 GOAL_TARGET_REQUIRED = "goal_target_required"
@@ -38,6 +39,10 @@ class BudgetCreateSchema(Schema):
     period = fields.Str(
         load_default="month",
         validate=validate.OneOf(BUDGET_PERIODS, error=INVALID_BUDGET_PERIOD),
+    )
+    kind = fields.Str(
+        load_default="expense",
+        validate=validate.OneOf(BUDGET_KINDS, error=INVALID_BUDGET_KIND),
     )
     category = fields.Str(
         load_default=None,
@@ -68,6 +73,9 @@ class BudgetUpdateSchema(Schema):
     period = fields.Str(
         validate=validate.OneOf(BUDGET_PERIODS, error=INVALID_BUDGET_PERIOD),
     )
+    kind = fields.Str(
+        validate=validate.OneOf(BUDGET_KINDS, error=INVALID_BUDGET_KIND),
+    )
     category = fields.Str(allow_none=True)
     currency = fields.Str(
         load_default=None,
@@ -82,6 +90,7 @@ class BudgetOutSchema(Schema):
     name = fields.Str()
     amount = fields.Float()
     period = fields.Str()
+    kind = fields.Str()
     category = fields.Str(allow_none=True)
     currency = fields.Str()
     is_active = fields.Bool()

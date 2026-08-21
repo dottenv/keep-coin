@@ -80,10 +80,10 @@ def _attach_budget_view(user_id, budget: Budget, accessible: set | None = None) 
 
 
 def _spent_for_budget(user_id, budget: Budget, accessible: set) -> Decimal:
-    """Сумма расходов за текущий период в рамках скоупа бюджета."""
+    """Сумма операций (расход или доход — по budget.kind) за период бюджета."""
     start, end = _period_range(budget.period)
     query = Transaction.query.filter(
-        Transaction.type == "expense",
+        Transaction.type == budget.kind,
         Transaction.currency == budget.currency,
         Transaction.date >= start,
         Transaction.date < end,
@@ -157,6 +157,54 @@ def _avg_monthly_totals(user_id, accessible: set, currency: str, months=3) -> tu
     return float(avg_income), float(avg_expense)
 
 
+def _build_insights(
+    monthly_expense,
+    month_income,
+    month_expense,
+    planned_income,
+    savings_target,
+    daily_budget,
+    has_income_plan,
+    has_expense_plan,
+) -> list[dict]:
+    """Простые рекомендации по плану. Тексты — на фронте по коду."""
+    insights: list[dict] = []
+    over = [b for b in monthly_expense if b._spent > b.amount]
+    if over:
+        amount = sum(b._spent - b.amount for b in over)
+        insights.append(
+            {"tone": "warn", "code": "budget_over", "count": len(over), "amount": float(amount)}
+        )
+
+    actual_net = month_income - month_expense
+    if savings_target > 0:
+        if actual_net >= savings_target:
+            insights.append({"tone": "good", "code": "savings_on_track"})
+        else:
+            insights.append(
+                {
+                    "tone": "warn",
+                    "code": "savings_short",
+                    "have": round(actual_net, 2),
+                    "need": round(savings_target, 2),
+                }
+            )
+
+    if actual_net < 0:
+        insights.append({"tone": "warn", "code": "negative_net", "amount": round(-actual_net, 2)})
+
+    if has_expense_plan and not has_income_plan:
+        insights.append({"tone": "info", "code": "no_income_plan"})
+
+    if has_expense_plan and daily_budget <= 0 and not over:
+        insights.append({"tone": "warn", "code": "no_daily_left"})
+
+    if not insights:
+        insights.append({"tone": "good", "code": "all_good"})
+
+    return insights
+
+
 class PlannerService:
     """Планировщик: бюджеты, цели накоплений и ежемесячный прогноз."""
 
@@ -200,6 +248,7 @@ class PlannerService:
             name=data["name"].strip(),
             amount=data["amount"],
             period=data.get("period", "month"),
+            kind=data.get("kind", "expense"),
             category=data.get("category") or None,
             currency=currency,
             is_active=bool(data.get("is_active", True)),
@@ -222,6 +271,8 @@ class PlannerService:
             budget.account_id = data["account_id"]
         if data.get("period") is not None:
             budget.period = data["period"]
+        if data.get("kind") is not None:
+            budget.kind = data["kind"]
         if "category" in data:
             budget.category = data.get("category") or None
         if data.get("currency") is not None:
@@ -339,6 +390,11 @@ class PlannerService:
                 "projected_balance": 0.0,
                 "daily_budget": 0.0,
                 "days_left": 0,
+                "planned_net": 0.0,
+                "actual_net": 0.0,
+                "net_diff": 0.0,
+                "category_breakdown": [],
+                "insights": [],
                 "budgets": [],
                 "goals": [],
             }
@@ -370,18 +426,22 @@ class PlannerService:
         budgets = PlannerService.list_budgets(user_id)
         active_budgets = [b for b in budgets if b.is_active and b.currency == primary]
         monthly_budgets = [b for b in active_budgets if b.period == "month"]
+        monthly_expense = [b for b in monthly_budgets if b.kind == "expense"]
+        monthly_income = [b for b in monthly_budgets if b.kind == "income"]
 
-        planned_expenses = float(
-            sum((b.amount for b in monthly_budgets), 0) or 0
-        )
+        planned_expenses = float(sum((b.amount for b in monthly_expense), 0) or 0)
         if not planned_expenses:
             planned_expenses = avg_expense
+
+        planned_income = float(sum((b.amount for b in monthly_income), 0) or 0)
+        if not planned_income:
+            planned_income = avg_income
 
         goals = PlannerService.list_goals(user_id)
         active_goals = [g for g in goals if g.is_active and g.currency == primary]
         savings_target = sum(g._needed_per_month for g in active_goals)
 
-        need_to_earn = max(0.0, planned_expenses + savings_target - avg_income)
+        need_to_earn = max(0.0, planned_expenses + savings_target - planned_income)
 
         current_balance = float(
             sum(
@@ -391,25 +451,58 @@ class PlannerService:
                 ).all()
             )
         )
-        projected_balance = current_balance + avg_income - planned_expenses - savings_target
+        projected_balance = current_balance + planned_income - planned_expenses - savings_target
 
-        remaining_total = sum(b._remaining for b in monthly_budgets)
+        remaining_total = sum(b._remaining for b in monthly_expense)
         days_left = (month_end - today).days
         daily_budget = round(remaining_total / days_left, 2) if days_left > 0 else 0.0
+
+        # Разбивка «план / факт» по категориям (для графика-сравнения).
+        category_breakdown = []
+        for b in [x for x in monthly_budgets if x.category]:
+            category_breakdown.append(
+                {
+                    "category": b.category,
+                    "kind": b.kind,
+                    "planned": float(b.amount),
+                    "actual": float(b._spent),
+                    "pct": float(b._pct),
+                }
+            )
+
+        planned_net = planned_income - planned_expenses - savings_target
+        actual_net = month_income - month_expense
+        net_diff = actual_net - planned_net
+
+        insights = _build_insights(
+            monthly_expense=monthly_expense,
+            month_income=month_income,
+            month_expense=month_expense,
+            planned_income=planned_income,
+            savings_target=savings_target,
+            daily_budget=daily_budget,
+            has_income_plan=bool(monthly_income),
+            has_expense_plan=bool(monthly_expense),
+        )
 
         return {
             "month": today.strftime("%Y-%m"),
             "currency": primary,
             "month_income": month_income,
             "month_expense": month_expense,
-            "planned_income": round(avg_income, 2),
+            "planned_income": round(planned_income, 2),
             "planned_expenses": round(planned_expenses, 2),
+            "planned_net": round(planned_net, 2),
+            "actual_net": round(actual_net, 2),
+            "net_diff": round(net_diff, 2),
             "savings_target": round(savings_target, 2),
             "need_to_earn": round(need_to_earn, 2),
             "current_balance": round(current_balance, 2),
             "projected_balance": round(projected_balance, 2),
             "daily_budget": daily_budget,
             "days_left": days_left,
+            "category_breakdown": category_breakdown,
+            "insights": insights,
             "budgets": budgets,
             "goals": goals,
         }
