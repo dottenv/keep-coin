@@ -87,7 +87,7 @@ export interface PlannerOverview {
   month_expense: number
   planned_income: number
   planned_expenses: number
-  planned_net: number
+  unassigned: number
   actual_net: number
   net_diff: number
   savings_target: number
@@ -96,6 +96,7 @@ export interface PlannerOverview {
   projected_balance: number
   daily_budget: number
   days_left: number
+  has_plan: boolean
   category_breakdown: CategoryPlan[]
   insights: PlannerInsight[]
   budgets: Budget[]

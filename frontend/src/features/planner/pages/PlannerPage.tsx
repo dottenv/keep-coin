@@ -8,7 +8,14 @@ import { Card } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { ProgressBar } from '@/features/planner/components/ProgressBar'
-import { fetchPlanner, type Budget, type SavingsGoal, type CategoryPlan, type PlannerInsight, type PlannerOverview } from '@/features/planner/api'
+import {
+  fetchPlanner,
+  type Budget,
+  type SavingsGoal,
+  type CategoryPlan,
+  type PlannerInsight,
+  type PlannerOverview,
+} from '@/features/planner/api'
 import { formatMoney, formatMonthYear, formatShortDate } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
@@ -20,7 +27,7 @@ function catLabel(t: (k: string) => string, category: string | null): string {
   return label.startsWith('categories.') ? category : label
 }
 
-/** Планер: план vs факт, бюджеты, цели накоплений и инсайты. */
+/** Планер: план месяца, план vs факт, бюджеты, цели и инсайты. */
 export function PlannerPage() {
   const { t } = useTranslation()
   const planner = useQuery({ queryKey: ['planner'], queryFn: fetchPlanner })
@@ -30,7 +37,7 @@ export function PlannerPage() {
       <AppShell>
         <PageHeader title={t('nav.plan')} />
         <div className="space-y-4">
-          <Skeleton className="h-44 rounded-[2rem]" />
+          <Skeleton className="h-48 rounded-[2rem]" />
           <Skeleton className="h-40 rounded-[2rem]" />
           <Skeleton className="h-40 rounded-[2rem]" />
         </div>
@@ -48,87 +55,131 @@ export function PlannerPage() {
       <PageHeader title={t('nav.plan')} />
 
       <div className="space-y-6">
-        {/* Hero: сколько нужно заработать */}
-        <section className={cn('relative overflow-hidden rounded-[2rem] p-5 text-white shadow-lifted animate-fade-in-up', HERO_ACCENT)}>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/10 blur-xl"
-          />
-          <div className="relative">
-            <p className="text-sm font-medium text-white/70">{t('planner.currentMonth', { month: monthLabel })}</p>
-            <p className="mt-3 text-[0.7rem] font-medium uppercase tracking-wider text-white/50">
-              {t('planner.needToEarn')}
-            </p>
-            <p className="mt-1 text-[2rem] font-bold leading-none tabular-nums tracking-tight">
-              <AnimatedNumber
-                value={data.need_to_earn}
-                format={(v) => formatMoney(v, data.currency)}
-              />
-            </p>
-            <p className="mt-1.5 text-xs text-white/60">{t('planner.needToEarnSub')}</p>
+        {!data.has_plan ? (
+          <Onboarding />
+        ) : (
+          <>
+            <MonthPlanHero data={data} />
+            <Insights insights={data.insights} currency={data.currency} />
+            <PlanVsActual data={data} />
+            {data.category_breakdown.length > 0 ? (
+              <CategoryBreakdown breakdown={data.category_breakdown} currency={data.currency} />
+            ) : null}
+          </>
+        )}
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-white/10 p-3">
-                <p className="text-[0.65rem] font-semibold text-white/55">{t('planner.planIncome')}</p>
-                <p className="mt-0.5 text-sm font-bold tabular-nums">
-                  <AnimatedNumber value={data.planned_income} format={(v) => formatMoney(v, data.currency)} />
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white/10 p-3">
-                <p className="text-[0.65rem] font-semibold text-white/55">{t('planner.plannedExpenses')}</p>
-                <p className="mt-0.5 text-sm font-bold tabular-nums">
-                  <AnimatedNumber value={data.planned_expenses} format={(v) => formatMoney(v, data.currency)} />
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Ключевые прогнозные цифры */}
-        <div className="grid grid-cols-3 gap-3">
-          <MiniCard
-            label={t('planner.savings')}
-            value={data.savings_target}
-            currency={data.currency}
-            sub={t('planner.savingsSub')}
-            tone="text-amber-600"
-            delay={80}
-          />
-          <MiniCard
-            label={t('planner.projectedBalance')}
-            value={data.projected_balance}
-            currency={data.currency}
-            sub={t('planner.projectedBalanceSub')}
-            tone={data.projected_balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}
-            delay={140}
-          />
-          <MiniCard
-            label={t('planner.dailyBudget')}
-            value={data.daily_budget}
-            currency={data.currency}
-            sub={t('planner.dailyBudgetSub')}
-            tone="text-brand-600"
-            delay={200}
-          />
-        </div>
-
-        {/* План vs Факт */}
-        <PlanVsActual data={data} />
-
-        {/* Инсайты */}
-        <Insights insights={data.insights} currency={data.currency} />
-
-        {/* Разбивка по категориям */}
-        {data.category_breakdown.length > 0 ? (
-          <CategoryBreakdown breakdown={data.category_breakdown} currency={data.currency} />
-        ) : null}
-
-        <BudgetSection title={t('planner.expenseBudgets')} to="/planner/budgets/new" cta={t('planner.addBudget')} budgets={expenseBudgets} emptyText={t('planner.noBudgets')} emptyCta={t('planner.noBudgetsCta')} />
-        <BudgetSection title={t('planner.incomePlans')} to="/planner/budgets/new" cta={t('planner.addIncomePlan')} budgets={incomeBudgets} emptyText={t('planner.noIncomePlans')} emptyCta={t('planner.noIncomePlansCta')} />
-
+        <BudgetSection
+          title={t('planner.expenseBudgets')}
+          to="/planner/budgets/new"
+          cta={t('planner.addBudget')}
+          budgets={expenseBudgets}
+          emptyText={t('planner.noBudgets')}
+          emptyCta={t('planner.noBudgetsCta')}
+        />
+        <BudgetSection
+          title={t('planner.incomePlans')}
+          to="/planner/budgets/new"
+          cta={t('planner.addIncomePlan')}
+          budgets={incomeBudgets}
+          emptyText={t('planner.noIncomePlans')}
+          emptyCta={t('planner.noIncomePlansCta')}
+        />
         <GoalSection goals={data.goals} />
       </div>
     </AppShell>
+  )
+}
+
+function Onboarding() {
+  const { t } = useTranslation()
+  return (
+    <Card className="space-y-4 p-6 text-center animate-fade-in-up">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-3xl bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+        </svg>
+      </div>
+      <div>
+        <h2 className="text-lg font-bold text-ink-900 dark:text-ink-100">{t('planner.onboardingTitle')}</h2>
+        <p className="mx-auto mt-1 max-w-xs text-sm text-ink-500 dark:text-ink-400">{t('planner.onboardingSub')}</p>
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+        <Link
+          to="/planner/budgets/new"
+          className="pressable rounded-2xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-transform active:scale-[0.98]"
+        >
+          {t('planner.addPlanCta')}
+        </Link>
+        <Link
+          to="/planner/goals/new"
+          className="pressable rounded-2xl bg-ink-100 px-5 py-2.5 text-sm font-semibold text-ink-700 transition-colors dark:bg-white/10 dark:text-ink-200"
+        >
+          {t('planner.noGoalsCta')}
+        </Link>
+      </div>
+    </Card>
+  )
+}
+
+function MonthPlanHero({ data }: { data: PlannerOverview }) {
+  const { t } = useTranslation()
+  const currency = data.currency
+  const allocated = data.planned_expenses + data.savings_target
+  const allocatedPct = data.planned_income > 0 ? (allocated / data.planned_income) * 100 : allocated > 0 ? 100 : 0
+  const over = allocatedPct > 100
+  const statusTone = data.unassigned >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+  const statusLabel = data.unassigned >= 0 ? t('planner.unassigned') : t('planner.needToEarn')
+  const statusValue = data.unassigned >= 0 ? data.unassigned : data.need_to_earn
+
+  return (
+    <section className={cn('relative overflow-hidden rounded-[2rem] p-5 text-white shadow-lifted animate-fade-in-up sm:p-6', HERO_ACCENT)}>
+      <div aria-hidden className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
+      <div className="relative">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-white/70">{t('planner.monthPlan', { month: monthLabel })}</p>
+          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[0.7rem] font-semibold text-white/80">
+            {t('planner.daysLeftShort', { count: data.days_left })}
+          </span>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/50">{t('planner.income')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight">
+              <AnimatedNumber value={data.planned_income} format={(v) => formatMoney(v, currency)} />
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/50">{t('planner.expense')}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight">
+              <AnimatedNumber value={data.planned_expenses} format={(v) => formatMoney(v, currency)} />
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-xs text-white/70">
+            <span>{t('planner.allocated')}</span>
+            <span className="tabular-nums">
+              {formatMoney(allocated, currency)} / {formatMoney(data.planned_income, currency)}
+            </span>
+          </div>
+          <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-white/15">
+            <div
+              className={cn('h-full rounded-full transition-all duration-700', over ? 'bg-rose-400' : 'bg-emerald-300')}
+              style={{ width: `${Math.min(100, allocatedPct)}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
+          <span className="text-sm font-medium text-white/80">{statusLabel}</span>
+          <span className={cn('text-base font-bold tabular-nums', statusTone === 'text-emerald-600 dark:text-emerald-400' ? 'text-white' : 'text-rose-200')}>
+            <AnimatedNumber value={statusValue} format={(v) => formatMoney(v, currency)} />
+          </span>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -146,41 +197,12 @@ function SectionHeaderLink({ title, to, label }: { title: string; to: string; la
   )
 }
 
-function MiniCard({
-  label,
-  value,
-  currency,
-  sub,
-  tone,
-  delay,
-}: {
-  label: string
-  value: number
-  currency: string
-  sub: string
-  tone: string
-  delay: number
-}) {
-  return (
-    <Card className="p-3.5 animate-fade-in-up" style={{ animationDelay: `${delay}ms` }}>
-      <p className="truncate text-[0.7rem] font-semibold text-ink-400">{label}</p>
-      <p className={cn('mt-1 truncate text-base font-bold tabular-nums tracking-tight', tone)}>
-        <AnimatedNumber value={value} format={(v) => formatMoney(v, currency)} />
-      </p>
-      <p className="mt-1 line-clamp-2 text-[0.65rem] leading-snug text-ink-300">{sub}</p>
-    </Card>
-  )
-}
-
 function PlanVsActual({ data }: { data: PlannerOverview }) {
   const { t } = useTranslation()
   const currency = data.currency
   return (
-    <Card className="space-y-4 p-5 animate-fade-in-up">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-ink-500 dark:text-ink-400">{t('planner.planVsActual')}</h2>
-        <span className="text-[0.65rem] font-medium text-ink-300">{data.days_left} {t('planner.daysLeftShort')}</span>
-      </div>
+    <Card className="space-y-5 p-5 animate-fade-in-up sm:p-6">
+      <h2 className="text-sm font-semibold text-ink-500 dark:text-ink-400">{t('planner.factThisMonth')}</h2>
 
       <CompareRow
         label={t('planner.income')}
@@ -204,7 +226,7 @@ function PlanVsActual({ data }: { data: PlannerOverview }) {
         </div>
         <div className="text-right">
           <p className="text-sm font-bold tabular-nums text-ink-800 dark:text-ink-100">
-            <AnimatedNumber value={data.planned_net} format={(v) => formatMoney(v, currency)} />
+            <AnimatedNumber value={data.unassigned} format={(v) => formatMoney(v, currency)} />
           </p>
           <p className={cn('text-[0.65rem] font-semibold tabular-nums', data.net_diff >= 0 ? 'text-emerald-600' : 'text-rose-500')}>
             {data.net_diff >= 0 ? '▲ ' : '▼ '}
@@ -238,19 +260,22 @@ function CompareRow({
 
   return (
     <div>
-      <div className="flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between text-sm">
         <span className="font-semibold text-ink-500 dark:text-ink-300">{label}</span>
         <span className="flex items-center gap-2 tabular-nums">
-          <span className="text-ink-300">{t('planner.plan')}: {formatMoney(planned, currency)}</span>
+          <span className="text-ink-400">{formatMoney(planned, currency)}</span>
           <span className={cn('font-bold', textTone)}>{formatMoney(actual, currency)}</span>
         </span>
       </div>
-      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+      <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
         <div
           className={cn('h-full rounded-full transition-all duration-700', tone)}
           style={{ width: `${Math.min(100, pct)}%` }}
         />
       </div>
+      <p className="mt-1 text-right text-[0.7rem] font-medium text-ink-300">
+        {t('planner.plan')}: {formatMoney(planned, currency)} · {t('planner.fact')}: {formatMoney(actual, currency)}
+      </p>
     </div>
   )
 }
@@ -286,12 +311,24 @@ function Insights({ insights, currency }: { insights: PlannerInsight[]; currency
   )
 }
 
-function insightText(t: (k: string, opts?: Record<string, unknown>) => string, ins: PlannerInsight, currency: string): { title: string; desc: string } {
+function insightText(t: (k: string) => string, ins: PlannerInsight, currency: string): { title: string; desc: string } {
   switch (ins.code) {
+    case 'no_plan':
+      return { title: t('insights.no_plan.title'), desc: t('insights.no_plan.desc') }
     case 'budget_over':
       return {
         title: t('insights.budget_over.title'),
         desc: t('insights.budget_over.desc', { count: ins.count ?? 0, amount: formatMoney(ins.amount ?? 0, currency) }),
+      }
+    case 'over_allocated':
+      return {
+        title: t('insights.over_allocated.title'),
+        desc: t('insights.over_allocated.desc', { amount: formatMoney(ins.amount ?? 0, currency) }),
+      }
+    case 'money_unassigned':
+      return {
+        title: t('insights.money_unassigned.title'),
+        desc: t('insights.money_unassigned.desc', { amount: formatMoney(ins.amount ?? 0, currency) }),
       }
     case 'savings_on_track':
       return { title: t('insights.savings_on_track.title'), desc: t('insights.savings_on_track.desc') }
@@ -318,9 +355,9 @@ function insightText(t: (k: string, opts?: Record<string, unknown>) => string, i
 function CategoryBreakdown({ breakdown, currency }: { breakdown: CategoryPlan[]; currency: string }) {
   const { t } = useTranslation()
   return (
-    <Card className="space-y-4 p-5 animate-fade-in-up">
+    <Card className="space-y-5 p-5 animate-fade-in-up sm:p-6">
       <h2 className="text-sm font-semibold text-ink-500 dark:text-ink-400">{t('planner.byCategory')}</h2>
-      <div className="space-y-3.5">
+      <div className="space-y-4">
         {breakdown.map((item, i) => (
           <CompareRow
             key={`${item.kind}-${item.category}-${i}`}
@@ -351,6 +388,7 @@ function BudgetSection({
   emptyText: string
   emptyCta: string
 }) {
+  const { t } = useTranslation()
   return (
     <section className="space-y-3 animate-fade-in-up">
       <SectionHeaderLink title={title} to={to} label={cta} />
