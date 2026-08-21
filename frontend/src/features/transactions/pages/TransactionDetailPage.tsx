@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import type { ReactNode } from 'react'
 
 import { AppShell } from '@/components/layout/AppShell'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -10,6 +11,7 @@ import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { useToast } from '@/components/ui/Toast'
 import { fetchAccounts } from '@/features/accounts/api'
 import { deleteTransaction, fetchTransaction } from '@/features/transactions/api'
+import { categoryView, CATEGORY_ICON_PATHS } from '@/features/categories/api'
 import { formatLongDate, formatMoney, formatSignedMoney } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
@@ -100,7 +102,42 @@ export function TransactionDetailPage() {
     },
   ]
   if (data.type !== 'transfer') {
-    rows.push({ label: t('transactions.category'), value: t(`categories.${data.category}`) })
+    const view = categoryView(t, {
+      category: data.category,
+      name: data.category_id ? data.category : null,
+      color: data.category_color,
+      icon: data.category_icon,
+    })
+    const categoryNode = (
+      <span className="flex items-center justify-end gap-1.5">
+        {view.color ? (
+          <span
+            className="grid h-4 w-4 place-items-center rounded-full"
+            style={{ backgroundColor: `${view.color}22`, color: view.color }}
+          >
+            {view.icon && CATEGORY_ICON_PATHS[view.icon] ? (
+              <svg
+                viewBox="0 0 24 24"
+                className="h-2.5 w-2.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d={CATEGORY_ICON_PATHS[view.icon]} />
+              </svg>
+            ) : null}
+          </span>
+        ) : null}
+        {view.label}
+      </span>
+    )
+    rows.push({
+      label: t('transactions.category'),
+      value: view.label,
+      node: categoryNode,
+    } as (typeof rows)[number] & { node?: ReactNode })
   }
   rows.push({ label: t('transactions.account'), value: account?.name })
   if (data.type === 'transfer' && toAccount) {
@@ -219,11 +256,11 @@ export function TransactionDetailPage() {
         <dl className="divide-y divide-ink-50 px-6 py-4 dark:divide-white/[0.06]">
           {rows.map(
             (row) =>
-              row.value ? (
+              row.value || (row as { node?: ReactNode }).node ? (
                 <div key={row.label} className="flex items-center justify-between py-3">
                   <dt className="text-sm text-ink-400">{row.label}</dt>
                   <dd className="max-w-[55%] truncate text-sm font-semibold text-ink-800 dark:text-ink-100">
-                    {row.value}
+                    {(row as { node?: ReactNode }).node ?? row.value}
                   </dd>
                 </div>
               ) : null,

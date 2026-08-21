@@ -46,6 +46,39 @@ export const CATEGORY_ICONS = [
   'zap',
 ] as const
 
+/** Коды встроенных категорий (переводятся через i18n, цвета/иконки нет). */
+export const BUILTIN_CATEGORY_CODES = new Set<string>([
+  'salary',
+  'freelance',
+  'gift',
+  'food',
+  'transport',
+  'shopping',
+  'entertainment',
+  'home',
+  'other',
+])
+
+export interface CategoryView {
+  label: string
+  color: string | null
+  icon: string | null
+}
+
+/** Унифицированное отображение категории: кастомная (имя/цвет/иконка) или код. */
+export function categoryView(
+  t: (key: string) => string,
+  opts: { category: string; name?: string | null; color?: string | null; icon?: string | null },
+): CategoryView {
+  if (opts.name) {
+    return { label: opts.name, color: opts.color ?? null, icon: opts.icon ?? null }
+  }
+  if (BUILTIN_CATEGORY_CODES.has(opts.category)) {
+    return { label: t(`categories.${opts.category}`), color: null, icon: null }
+  }
+  return { label: opts.category, color: null, icon: null }
+}
+
 export const CATEGORY_ICON_PATHS: Record<string, string> = {
   'shopping-bag': 'M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2',
   cart: 'M3 4h2l2.4 12h11L21 8H6',

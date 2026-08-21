@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import type { Account } from '@/features/accounts/api'
 import type { Transaction } from '@/features/transactions/api'
+import { categoryView, CATEGORY_ICON_PATHS } from '@/features/categories/api'
 import { formatShortDate, formatSignedMoney, isToday, formatMoney } from '@/lib/format'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/cn'
@@ -106,8 +107,30 @@ export function TransactionsList({
                       </span>
                     ) : null}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-ink-400">
-                    {tx.type !== 'transfer' ? t(`categories.${tx.category}`) : null}
+                  <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink-400">
+                    {tx.type !== 'transfer' ? (
+                      <span className="flex items-center gap-1">
+                        {(() => {
+                          const view = categoryView(t, {
+                            category: tx.category,
+                            name: tx.category_id ? tx.category : null,
+                            color: tx.category_color,
+                            icon: tx.category_icon,
+                          })
+                          return (
+                            <>
+                              {view.color ? (
+                                <span
+                                  className="h-2 w-2 shrink-0 rounded-full"
+                                  style={{ backgroundColor: view.color }}
+                                />
+                              ) : null}
+                              <span className="truncate">{view.label}</span>
+                            </>
+                          )
+                        })()}
+                      </span>
+                    ) : null}
                     {account ? ` · ${account.name}` : ''}
                     {tx.type === 'transfer' && toAccount ? ` → ${toAccount.name}` : ''}
                   </p>
