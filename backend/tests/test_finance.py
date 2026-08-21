@@ -195,7 +195,16 @@ def test_transactions_list_detail_and_summary(client):
     summary = client.get("/api/transactions/summary").get_json()
     assert summary["total_expense"] == 600
     assert summary["total_income"] == 0
-    assert summary["expense_by_category"] == [{"category": "transport", "total": 600}]
+    assert summary["expense_by_category"] == [
+        {
+            "category": "transport",
+            "category_id": None,
+            "name": None,
+            "color": None,
+            "icon": None,
+            "total": 600.0,
+        }
+    ]
 
     missing = client.get("/api/transactions/00000000-0000-0000-0000-000000000000")
     assert missing.status_code == 404

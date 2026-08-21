@@ -55,9 +55,19 @@ export interface AccountMember {
   is_owner: boolean
 }
 
+export interface FamilyMember {
+  user_id: string
+  display_name: string
+  email: string
+  role: AccountRole
+  is_owner: boolean
+  relation: 'owner' | 'member'
+}
+
 export interface AccountInvite {
   id: string
-  account_id: string
+  account_id: string | null
+  scope: 'account' | 'family'
   account_name: string
   inviter_name: string
   role: AccountRole
@@ -119,4 +129,36 @@ export async function acceptInvite(inviteId: string): Promise<{ ok: boolean }> {
 
 export async function declineInvite(inviteId: string): Promise<{ ok: boolean }> {
   return api<{ ok: boolean }>(`/api/invites/${inviteId}`, { method: 'DELETE' })
+}
+
+// ───────────────────────── Семейный доступ ─────────────────────────
+
+export interface FamilyResponse {
+  members: FamilyMember[]
+}
+
+export async function fetchFamily(): Promise<FamilyMember[]> {
+  const body = await api<FamilyResponse>('/api/family')
+  return body.members
+}
+
+export async function inviteFamily(
+  email: string,
+  role: AccountRole,
+): Promise<{ id: string; email: string; role: AccountRole; scope: string }> {
+  return api('/api/family/invite', { method: 'POST', json: { email, role } })
+}
+
+export async function updateFamilyRole(
+  userId: string,
+  role: AccountRole,
+): Promise<{ ok: boolean }> {
+  return api<{ ok: boolean }>(`/api/family/${userId}/role`, {
+    method: 'PATCH',
+    json: { role },
+  })
+}
+
+export async function removeFamilyMember(userId: string): Promise<{ ok: boolean }> {
+  return api<{ ok: boolean }>(`/api/family/${userId}`, { method: 'DELETE' })
 }

@@ -10,6 +10,8 @@ export interface Transaction {
   title: string
   category: string
   category_id?: string | null
+  category_color?: string | null
+  category_icon?: string | null
   amount: number
   currency: string
   date: string
@@ -31,6 +33,10 @@ export type UpdateTransactionPayload = Partial<CreateTransactionPayload>
 
 export interface CategoryTotal {
   category: string
+  category_id?: string | null
+  name?: string | null
+  color?: string | null
+  icon?: string | null
   total: number
 }
 
@@ -44,6 +50,14 @@ export interface MonthlyTotal {
   month: string
   income: number
   expense: number
+}
+
+export interface SummaryFilters {
+  account_id?: string
+  category?: string
+  type?: TransactionType
+  date_from?: string
+  date_to?: string
 }
 
 export interface Summary {
@@ -116,8 +130,32 @@ export async function deleteTransaction(id: string): Promise<{ ok: boolean }> {
   return api<{ ok: boolean }>(`/api/transactions/${id}`, { method: 'DELETE' })
 }
 
-export async function fetchSummary(): Promise<Summary> {
-  return api<Summary>('/api/transactions/summary')
+export async function fetchSummary(filters?: SummaryFilters): Promise<Summary> {
+  const params = new URLSearchParams()
+  if (filters?.account_id) params.set('account_id', filters.account_id)
+  if (filters?.category) params.set('category', filters.category)
+  if (filters?.type) params.set('type', filters.type)
+  if (filters?.date_from) params.set('date_from', filters.date_from)
+  if (filters?.date_to) params.set('date_to', filters.date_to)
+  const query = params.toString()
+  return api<Summary>(`/api/transactions/summary${query ? `?${query}` : ''}`)
+}
+
+export interface SuggestedCategory {
+  id: string
+  name: string
+  color: string
+  icon: string
+  kind: 'income' | 'expense'
+}
+
+export async function fetchCategorySuggestion(
+  q: string,
+): Promise<SuggestedCategory | null> {
+  const body = await api<{ category: SuggestedCategory | null }>(
+    `/api/transactions/category-suggestion?q=${encodeURIComponent(q)}`,
+  )
+  return body.category
 }
 
 export async function fetchSuggestions(
