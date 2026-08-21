@@ -20,6 +20,7 @@ export const ru = {
     clearFilters: 'Очистить фильтры',
     filters: 'Фильтры',
     clear: 'Очистить',
+    send: 'Отправить',
   },
   language: {
     label: 'Язык',

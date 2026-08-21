@@ -11,6 +11,7 @@ import {
   AllTransactionsPage,
   CategoriesPage,
   DashboardPage,
+  FamilyPage,
   InvitesPage,
   LoginPage,
   ProfilePage,
@@ -61,6 +62,7 @@ export function AppRoutes() {
         <Route path="/accounts/:id/edit" element={<Protected><AccountFormPage /></Protected>} />
         <Route path="/accounts/:id/members" element={<Protected><AccountMembersPage /></Protected>} />
         <Route path="/invites" element={<Protected><InvitesPage /></Protected>} />
+        <Route path="/family" element={<Protected><FamilyPage /></Protected>} />
         <Route path="/categories" element={<Protected><CategoriesPage /></Protected>} />
         <Route path="/stats" element={<Protected><StatsPage /></Protected>} />
         <Route path="/transactions" element={<Protected><AllTransactionsPage /></Protected>} />

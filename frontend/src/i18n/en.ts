@@ -22,6 +22,7 @@ export const en: Ru = {
     clearFilters: 'Clear filters',
     filters: 'Filters',
     clear: 'Clear',
+    send: 'Send',
   },
   language: {
     label: 'Language',
