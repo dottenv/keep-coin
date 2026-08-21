@@ -346,6 +346,7 @@ export const en: Ru = {
     appearanceHint: 'Glass surfaces adapt automatically',
     themeLight: 'Light',
     themeDark: 'Dark',
+    themeUltra: 'Neon',
     statAccounts: 'accounts',
     statCategories: 'categories',
   },

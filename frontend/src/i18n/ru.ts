@@ -344,6 +344,7 @@ export const ru = {
     appearanceHint: 'Стеклянные поверхности адаптируются автоматически',
     themeLight: 'Светлая',
     themeDark: 'Тёмная',
+    themeUltra: 'Неон',
     statAccounts: 'счетов',
     statCategories: 'категорий',
   },
