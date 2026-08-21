@@ -12,6 +12,8 @@ export interface Transaction {
   category_id?: string | null
   category_color?: string | null
   category_icon?: string | null
+  author_name?: string | null
+  is_own?: boolean
   amount: number
   currency: string
   date: string
