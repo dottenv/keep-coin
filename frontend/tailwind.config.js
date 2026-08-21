@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+import plugin from 'tailwindcss/plugin'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
@@ -96,5 +98,11 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Вариант `ultra`: стили применяются, когда у <html> есть класс `ultra`
+    // (неоновая «жидкая» тёмная тема). ultra всегда идёт вместе с `dark`.
+    plugin(({ addVariant }) => {
+      addVariant('ultra', '.ultra &')
+    }),
+  ],
 }
