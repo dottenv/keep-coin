@@ -47,6 +47,16 @@ export function StatsPage() {
 
   const allCategories: Category[] = categoriesQ.data ?? []
 
+  // Валюта: валюта выбранного счёта, иначе — счёта с наибольшим балансом.
+  const currency = (() => {
+    const list = accounts.data ?? []
+    if (filters.account_id) {
+      return list.find((a) => a.id === filters.account_id)?.currency ?? 'RUB'
+    }
+    if (!list.length) return 'RUB'
+    return list.reduce((top, a) => (Math.abs(a.balance) > Math.abs(top.balance) ? a : top), list[0]).currency
+  })()
+
   const categoryOptions = [
     ...allCategories.map((c) => ({ value: c.name, label: c.name })),
     ...BUILTIN.expense.map((code) => ({ value: code, label: t(`categories.${code}`) })),
