@@ -121,7 +121,13 @@ export function FloatingAction() {
         />
       ) : null}
 
-      <div className="fixed right-4 z-40 flex flex-col items-end" style={{ bottom: 'calc(5.5rem + 12px)' }}>
+      <div
+        className="fixed right-4 z-40 flex flex-col items-end"
+        style={{
+          bottom:
+            'calc(5.5rem + 12px + max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-bottom, 0px)))',
+        }}
+      >
         {/* выпадающие кнопки */}
         {open ? (
           <div className="mb-3 flex flex-col items-end gap-2.5">

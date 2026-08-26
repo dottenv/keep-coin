@@ -25,8 +25,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div
         className="relative z-10 mx-auto w-full max-w-2xl px-4 sm:px-6"
         style={{
-          paddingTop: 'calc(1.25rem + var(--tg-safe-area-top, 0px))',
-          paddingBottom: 'calc(8rem + var(--tg-safe-area-bottom, 0px))',
+          paddingTop:
+            'calc(1.25rem + max(env(safe-area-inset-top, 0px), var(--tg-safe-area-top, 0px)))',
+          paddingBottom:
+            'calc(8rem + max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-bottom, 0px)))',
         }}
       >
         <header className="flex min-w-0 items-center gap-3 animate-fade-in">
