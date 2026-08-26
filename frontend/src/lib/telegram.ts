@@ -28,8 +28,13 @@ export interface TelegramWebApp {
 
 export function getTelegramWebApp(): TelegramWebApp | null {
   if (typeof window === 'undefined') return null
-  const tg = (window as unknown as { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp
-  return tg ?? null
+  const w = window as unknown as {
+    Telegram?: { WebApp?: TelegramWebApp }
+    TelegramWebApp?: TelegramWebApp
+  }
+  // Поддерживаем и современный window.Telegram.WebApp, и легаси window.TelegramWebApp.
+  const tg = w.Telegram?.WebApp ?? w.TelegramWebApp ?? null
+  return tg
 }
 
 export function isTelegramWebApp(): boolean {
@@ -40,6 +45,24 @@ export function getTelegramInitData(): string | null {
   const tg = getTelegramWebApp()
   if (!tg) return null
   return tg.initData || null
+}
+
+/**
+ * Telegram не всегда инициализирует объект WebApp и initData синхронно к
+ * моменту маунта React. Ждём появления initData небольшое время, иначе
+ * автологин сработает «впустую» и откроется экран входа.
+ */
+export function waitForTelegramInitData(timeoutMs = 2000): Promise<string | null> {
+  return new Promise((resolve) => {
+    const start = Date.now()
+    const tick = () => {
+      const data = getTelegramInitData()
+      if (data) return resolve(data)
+      if (Date.now() - start > timeoutMs) return resolve(null)
+      setTimeout(tick, 50)
+    }
+    tick()
+  })
 }
 
 /**

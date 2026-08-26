@@ -71,7 +71,11 @@ class UserService:
         first = telegram_data.get("first_name") or ""
         last = telegram_data.get("last_name") or ""
         username = telegram_data.get("username")
-        display_name = f"{first} {last}".strip() or username or f"User {tg_id}"
+        # Приоритет: настоящее имя → @username (явный «ориентир» Telegram) → заглушка.
+        display_name = (
+            f"{first} {last}".strip()
+            or (f"@{username}" if username else f"User {tg_id}")
+        )
 
         user = User(
             email=f"tg_{tg_id}@keepcoin.local",
