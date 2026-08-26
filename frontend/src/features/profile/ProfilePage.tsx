@@ -76,7 +76,7 @@ function ThemeOption({
   onSelect: () => void
   label: string
 }) {
-  const isDark = theme === 'dark' || theme === 'ultra'
+  const isDark = theme === 'dark'
   return (
     <button
       type="button"
@@ -94,11 +94,9 @@ function ThemeOption({
       <span
         className={cn(
           'block rounded-xl border px-3 pb-5 pt-2',
-          theme === 'ultra'
-            ? 'border-emerald-400/30 bg-[#06231a]'
-            : isDark
-              ? 'border-white/10 bg-ink-900'
-              : 'border-ink-100 bg-ink-50',
+          isDark
+            ? 'border-white/10 bg-ink-900'
+            : 'border-ink-100 bg-ink-50',
         )}
       >
         <span className="flex items-center gap-1.5">
@@ -106,14 +104,14 @@ function ThemeOption({
           <span
             className={cn(
               'h-1.5 w-3/4 rounded-full',
-              theme === 'ultra' ? 'bg-emerald-400/40' : isDark ? 'bg-white/25' : 'bg-ink-300',
+              isDark ? 'bg-white/25' : 'bg-ink-300',
             )}
           />
         </span>
         <span
           className={cn(
             'mt-2 block h-2.5 w-full rounded-md',
-            theme === 'ultra' ? 'bg-fuchsia-400/10' : isDark ? 'bg-white/10' : 'bg-white/70',
+            isDark ? 'bg-white/10' : 'bg-white/70',
           )}
         />
       </span>

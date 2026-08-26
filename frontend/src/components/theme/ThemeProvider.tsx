@@ -8,17 +8,17 @@ import {
   type ReactNode,
 } from 'react'
 
-export type Theme = 'light' | 'dark' | 'ultra'
+export type Theme = 'light' | 'dark'
 
 const STORAGE_KEY = 'keep-coin-theme'
 
-const ORDER: Theme[] = ['light', 'dark', 'ultra']
+const ORDER: Theme[] = ['light', 'dark']
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'light' || saved === 'dark' || saved === 'ultra') return saved
+    if (saved === 'light' || saved === 'dark') return saved
   } catch {
     /* ignore */
   }
@@ -39,9 +39,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement
-    // Ultra — это тёмная тема с неоновыми акцентами, поэтому `dark` нужен всегда.
     root.classList.toggle('dark', theme !== 'light')
-    root.classList.toggle('ultra', theme === 'ultra')
     try {
       localStorage.setItem(STORAGE_KEY, theme)
     } catch {

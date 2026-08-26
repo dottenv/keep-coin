@@ -303,7 +303,7 @@ export function AddTransactionPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Переключатель типа */}
             <div
-              className="grid grid-cols-3 gap-1 rounded-2xl border border-ink-200 bg-ink-50 p-1 dark:border-white/15 dark:bg-white/[0.06] ultra:border-white/15 ultra:bg-white/[0.06]"
+              className="grid grid-cols-3 gap-1 rounded-2xl border border-ink-200 bg-ink-50 p-1 dark:border-white/15 dark:bg-white/[0.06]"
               role="group"
               aria-label={t('transactions.type')}
             >
@@ -318,7 +318,7 @@ export function AddTransactionPage() {
                   className={cn(
                     'pressable rounded-xl py-2 text-xs font-bold transition-colors',
                     type === option
-                      ? 'bg-white text-ink-900 shadow-soft dark:bg-white/[0.12] dark:text-ink-100 ultra:bg-white/15 ultra:text-white'
+                      ? 'bg-white text-ink-900 shadow-soft dark:bg-white/[0.12] dark:text-ink-100'
                       : 'text-ink-500 hover:text-ink-800 dark:text-ink-400 dark:hover:text-ink-200',
                   )}
                 >

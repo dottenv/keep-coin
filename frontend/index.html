@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#059669" />
     <meta name="description" content="Keep Coin — учёт личных и семейных финансов" />
     <title>Keep Coin</title>
@@ -11,7 +14,10 @@
       // Применить сохранённую тему до первого рендера (исключает «мигание»).
       try {
         var kcTheme = localStorage.getItem('keep-coin-theme')
-        if (kcTheme === 'dark') document.documentElement.classList.add('dark')
+        // ultra больше не существует — трактуем как тёмную.
+        if (kcTheme === 'dark' || kcTheme === 'ultra') {
+          document.documentElement.classList.add('dark')
+        }
       } catch (e) {}
     </script>
     <style>
