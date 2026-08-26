@@ -15,6 +15,10 @@ export default defineConfig({
       // Dev-сервис-воркер кэширует чанки со старыми хэшами и ломает Hot-reload
       // (и даёт «две React» → белый экран). В разработке PWA не нужен.
       devOptions: { enabled: false },
+      // Регистрируем вручную в main.tsx (чтобы не было двойной регистрации).
+      injectRegister: null,
+      // autoUpdate: при появлении нового SW он self.skipWaiting + clientsClaim,
+      // страница перезагружается тем же URL и остаётся в standalone.
       registerType: 'autoUpdate',
       includeAssets: [
         'icons/icon.svg',
@@ -103,6 +107,10 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         cleanupOutdatedCaches: true,
+        // КРИТИЧНО для iOS: SW сразу забирает контроль над уже открытой
+        // страницей, иначе навигации не контролируются → iOS кидает в Safari.
+        clientsClaim: true,
+        skipWaiting: true,
         // Все навигации (в т.ч. офлайн) отдаём закешированный app-shell,
         // чтобы PWA не «выпадала» в Safari/внутренний браузер.
         navigateFallback: '/index.html',

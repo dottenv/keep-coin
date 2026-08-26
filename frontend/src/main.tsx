@@ -39,6 +39,14 @@ if (import.meta.env.PROD) {
  * «чёрно-белым». Если через пару секунд маркер стилей не сработал —
  * один раз перезагружаем страницу (свежий запрос CSS).
  */
+function isStandalonePwa(): boolean {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    ('standalone' in navigator && (navigator as Navigator & { standalone?: boolean }).standalone === true)
+  )
+}
+
 function healMissingCss(): void {
   const probe = document.createElement('span')
   probe.className = 'css-probe'
@@ -59,7 +67,9 @@ function healMissingCss(): void {
     probe.remove()
     if (healed) return
     const attempts = Number(sessionStorage.getItem('kc-css-heal') ?? '0')
-    if (navigator.onLine === false || attempts >= 2) return
+    // В установленном PWA перезагрузка может выбросить в Safari — не делаем её.
+    // SW кеширует CSS, поэтому на повторных открытиях стили будут сразу.
+    if (navigator.onLine === false || attempts >= 2 || isStandalonePwa()) return
     sessionStorage.setItem('kc-css-heal', String(attempts + 1))
     window.location.reload()
   }, 2500)
