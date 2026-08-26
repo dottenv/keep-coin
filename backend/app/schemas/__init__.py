@@ -27,6 +27,16 @@ from app.schemas.planner import (
     goal_out_schema,
     goal_update_schema,
 )
+from app.schemas.notification import (
+    credit_create_schema,
+    credit_out_schema,
+    credit_update_schema,
+    push_subscription_create_schema,
+    push_subscription_out_schema,
+    reminder_create_schema,
+    reminder_out_schema,
+    reminder_update_schema,
+)
 from app.schemas.sharing import (
     MemberInviteSchema,
     RoleUpdateSchema,
@@ -59,6 +69,14 @@ __all__ = [
     "goal_create_schema",
     "goal_out_schema",
     "goal_update_schema",
+    "credit_create_schema",
+    "credit_out_schema",
+    "credit_update_schema",
+    "push_subscription_create_schema",
+    "push_subscription_out_schema",
+    "reminder_create_schema",
+    "reminder_out_schema",
+    "reminder_update_schema",
     "MemberInviteSchema",
     "RoleUpdateSchema",
     "invite_out_schema",

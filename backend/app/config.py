@@ -36,6 +36,18 @@ class Config:
     # Максимальный возраст init_data (секунды). 0 — без проверки возраста.
     TELEGRAM_INIT_DATA_MAX_AGE = int(os.environ.get("TELEGRAM_INIT_DATA_MAX_AGE", "86400"))
 
+    # WebPush (VAPID): приватный/публичный ключи и subject. Если не заданы
+    # через переменные окружения — генерируются один раз и кэшируются в файл
+    # рядом с приложением (vapid_keys.json), чтобы подписки оставались валидными.
+    VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY")
+    VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY")
+    VAPID_SUBJECT = os.environ.get("VAPID_SUBJECT", "mailto:admin@keep-coin.app")
+
+    # Фоновый планировщик напоминаний: как часто проверять просроченные
+    # напоминания (секунды) и включён ли он вообще.
+    REMINDER_SCHEDULER_ENABLED = os.environ.get("REMINDER_SCHEDULER_ENABLED", "true").lower() == "true"
+    REMINDER_SCHEDULER_INTERVAL = int(os.environ.get("REMINDER_SCHEDULER_INTERVAL", "30"))
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

@@ -30,6 +30,12 @@ class SavingsGoal(TimestampMixin, db.Model):
     currency = db.Column(db.String(3), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
 
+    # Период действия цели: с какой даты и до какой (включительно). NULL — без ограничения.
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
+    # Цикл повторения напоминания по цели: none | daily | weekly | monthly | quarterly | yearly.
+    recurrence = db.Column(db.String(12), default="none", nullable=False)
+
     user = db.relationship("User", backref=db.backref("goals", lazy="dynamic"))
     account = db.relationship("Account", backref=db.backref("goals", lazy="dynamic"))
 

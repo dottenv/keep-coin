@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, validate
 
 from app.models.account import DEFAULT_CURRENCY
 from app.models.budget import BUDGET_KINDS, BUDGET_PERIODS
+from app.models.notification import RECURRENCES
 
 BUDGET_NAME_REQUIRED = "budget_name_required"
 BUDGET_NAME_LONG = "budget_name_long"
@@ -55,6 +56,12 @@ class BudgetCreateSchema(Schema):
         validate=validate.Regexp(r"^[A-Z]{3}$", error=INVALID_BUDGET_CURRENCY),
     )
     is_active = fields.Bool(load_default=True)
+    start_date = fields.Date(load_default=None, allow_none=True)
+    end_date = fields.Date(load_default=None, allow_none=True)
+    recurrence = fields.Str(
+        load_default="none",
+        validate=validate.OneOf(RECURRENCES, error="invalid_recurrence"),
+    )
 
 
 class BudgetUpdateSchema(Schema):
@@ -83,6 +90,11 @@ class BudgetUpdateSchema(Schema):
         validate=validate.Regexp(r"^[A-Z]{3}$", error=INVALID_BUDGET_CURRENCY),
     )
     is_active = fields.Bool()
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    recurrence = fields.Str(
+        validate=validate.OneOf(RECURRENCES, error="invalid_recurrence"),
+    )
 
 
 class BudgetOutSchema(Schema):
@@ -101,6 +113,9 @@ class BudgetOutSchema(Schema):
     spent = fields.Function(lambda obj: float(getattr(obj, "_spent", 0) or 0))
     remaining = fields.Function(lambda obj: float(getattr(obj, "_remaining", 0) or 0))
     pct = fields.Function(lambda obj: float(getattr(obj, "_pct", 0) or 0))
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    recurrence = fields.Str()
     created_at = fields.DateTime()
 
 
@@ -139,6 +154,12 @@ class GoalCreateSchema(Schema):
         validate=validate.Regexp(r"^[A-Z]{3}$", error=INVALID_GOAL_CURRENCY),
     )
     is_active = fields.Bool(load_default=True)
+    start_date = fields.Date(load_default=None, allow_none=True)
+    end_date = fields.Date(load_default=None, allow_none=True)
+    recurrence = fields.Str(
+        load_default="none",
+        validate=validate.OneOf(RECURRENCES, error="invalid_recurrence"),
+    )
 
 
 class GoalUpdateSchema(Schema):
@@ -172,6 +193,11 @@ class GoalUpdateSchema(Schema):
         validate=validate.Regexp(r"^[A-Z]{3}$", error=INVALID_GOAL_CURRENCY),
     )
     is_active = fields.Bool()
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    recurrence = fields.Str(
+        validate=validate.OneOf(RECURRENCES, error="invalid_recurrence"),
+    )
 
 
 class GoalOutSchema(Schema):
@@ -190,6 +216,9 @@ class GoalOutSchema(Schema):
     needed_per_month = fields.Function(
         lambda obj: float(getattr(obj, "_needed_per_month", 0) or 0)
     )
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    recurrence = fields.Str()
     created_at = fields.DateTime()
 
 

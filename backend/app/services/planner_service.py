@@ -9,6 +9,7 @@ from app.extensions import db
 from app.models import (
     Account,
     Budget,
+    Credit,
     SavingsGoal,
     Transaction,
 )
@@ -96,6 +97,28 @@ def _spent_for_budget(user_id, budget: Budget, accessible: set) -> Decimal:
         query = query.filter(Transaction.category == budget.category)
     result = query.with_entities(func.sum(Transaction.amount)).scalar()
     return result or Decimal("0")
+
+
+def _credit_next_payment_date(credit: Credit):
+    ref = credit.first_payment_date or credit.start_date
+    if ref is None:
+        return None
+    if credit.payment_day:
+        today = date.today()
+        y, m = today.year, today.month
+        try:
+            candidate = date(y, m, credit.payment_day)
+        except ValueError:
+            candidate = date(y, m, 28)
+        if candidate < today:
+            if m == 12:
+                candidate = date(y + 1, 1, credit.payment_day)
+            else:
+                candidate = date(y, m + 1, credit.payment_day)
+        return candidate
+    if ref.month == 12:
+        return date(ref.year + 1, 1, 1)
+    return date(ref.year, ref.month + 1, 1)
 
 
 def _goal_needed_per_month(goal: SavingsGoal) -> Decimal:
@@ -267,6 +290,9 @@ class PlannerService:
             category=data.get("category") or None,
             currency=currency,
             is_active=bool(data.get("is_active", True)),
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date"),
+            recurrence=data.get("recurrence", "none"),
         )
         db.session.add(budget)
         db.session.commit()
@@ -294,6 +320,12 @@ class PlannerService:
             budget.currency = data["currency"]
         if data.get("is_active") is not None:
             budget.is_active = data["is_active"]
+        if "start_date" in data:
+            budget.start_date = data.get("start_date")
+        if "end_date" in data:
+            budget.end_date = data.get("end_date")
+        if data.get("recurrence") is not None:
+            budget.recurrence = data["recurrence"]
         db.session.commit()
         return _attach_budget_view(user_id, budget)
 
@@ -348,6 +380,9 @@ class PlannerService:
             monthly_contribution=data.get("monthly_contribution"),
             currency=currency,
             is_active=bool(data.get("is_active", True)),
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date"),
+            recurrence=data.get("recurrence", "none"),
         )
         db.session.add(goal)
         db.session.commit()
@@ -375,6 +410,12 @@ class PlannerService:
             goal.currency = data["currency"]
         if data.get("is_active") is not None:
             goal.is_active = data["is_active"]
+        if "start_date" in data:
+            goal.start_date = data.get("start_date")
+        if "end_date" in data:
+            goal.end_date = data.get("end_date")
+        if data.get("recurrence") is not None:
+            goal.recurrence = data["recurrence"]
         db.session.commit()
         return _attach_goal_view(user_id, goal)
 
@@ -413,6 +454,7 @@ class PlannerService:
                 "insights": [],
                 "budgets": [],
                 "goals": [],
+                "credits": [],
             }
 
         primary = _primary_currency(accessible)
@@ -523,4 +565,47 @@ class PlannerService:
             "insights": insights,
             "budgets": budgets,
             "goals": goals,
+            "credits": PlannerService.list_credits(user_id),
         }
+
+    # ---------- Кредиты ----------
+
+    @staticmethod
+    def list_credits(user_id) -> list[dict]:
+        credits = (
+            Credit.query.filter_by(user_id=user_id)
+            .order_by(Credit.created_at.asc())
+            .all()
+        )
+        result = []
+        for c in credits:
+            account_name = None
+            if c.account_id is not None:
+                acc = db.session.get(Account, c.account_id)
+                account_name = acc.name if acc else None
+            remaining = float(c.total_amount - (c.paid_amount or 0))
+            result.append(
+                {
+                    "id": str(c.id),
+                    "name": c.name,
+                    "currency": c.currency,
+                    "total_amount": float(c.total_amount),
+                    "paid_amount": float(c.paid_amount or 0),
+                    "remaining": float(max(0, remaining)),
+                    "payment_amount": float(c.payment_amount) if c.payment_amount else None,
+                    "interest_rate": float(c.interest_rate or 0),
+                    "first_payment_date": c.first_payment_date.isoformat()
+                    if c.first_payment_date
+                    else None,
+                    "start_date": c.start_date.isoformat() if c.start_date else None,
+                    "payment_day": c.payment_day,
+                    "notes": c.notes,
+                    "is_active": c.is_active,
+                    "account_id": str(c.account_id) if c.account_id else None,
+                    "account_name": account_name,
+                    "next_payment_date": _credit_next_payment_date(c).isoformat()
+                    if _credit_next_payment_date(c)
+                    else None,
+                }
+            )
+        return result

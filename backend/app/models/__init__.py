@@ -6,6 +6,13 @@ from app.models.budget import BUDGET_PERIODS, Budget
 from app.models.category import Category
 from app.models.category_keyword import CategoryKeyword
 from app.models.family_member import FamilyMember
+from app.models.notification import (
+    Credit,
+    PushSubscription,
+    RECURRENCES,
+    Reminder,
+    REMINDER_TYPES,
+)
 from app.models.recurring_phrase import RecurringPhrase
 from app.models.savings_goal import SavingsGoal
 from app.models.transaction import (
@@ -25,8 +32,14 @@ __all__ = [
     "Budget",
     "Category",
     "CategoryKeyword",
+    "Credit",
     "FamilyMember",
+    "PushSubscription",
+    "Recurrence",
+    "RECURRENCES",
     "RecurringPhrase",
+    "Reminder",
+    "REMINDER_TYPES",
     "SavingsGoal",
     "Transaction",
     "User",

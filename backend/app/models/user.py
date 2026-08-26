@@ -34,6 +34,9 @@ class User(TimestampMixin, db.Model):
     telegram_link_token = db.Column(db.String(64), index=True, nullable=True)
     telegram_link_token_expires = db.Column(db.DateTime, nullable=True)
     locale = db.Column(db.String(5), default="ru", nullable=False)
+    # Часовой пояс пользователя (IANA, напр. Europe/Moscow). Используется для
+    # корректного расчёта времени напоминаний.
+    timezone = db.Column(db.String(64), default="UTC", nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     # Момент последнего сброса «ключевых слов» для повторяющихся платежей:
     # после сброса детект стартует заново и не учитывает историю до этого момента.
