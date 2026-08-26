@@ -72,6 +72,23 @@ const icon = {
       <path d='M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6' />
     </svg>
   ),
+  credit: (
+    <svg viewBox='0 0 24 24' className='h-4 w-4' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+      <rect x='2' y='5' width='20' height='14' rx='2' />
+      <path d='M2 10h20' />
+    </svg>
+  ),
+  bell: (
+    <svg viewBox='0 0 24 24' className='h-4 w-4' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+      <path d='M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0' />
+    </svg>
+  ),
+  clock: (
+    <svg viewBox='0 0 24 24' className='h-4 w-4' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+      <circle cx='12' cy='12' r='9' />
+      <path d='M12 7v5l3 2' />
+    </svg>
+  ),
 }
 
 function Segment<T extends string>({
@@ -347,6 +364,27 @@ export function ProfilePage() {
             hint={statsLoading ? undefined : t('categories.manageHint')}
             chevron
             to='/categories'
+          />
+          <SettingsRow
+            icon={icon.credit}
+            label={t('nav.credits')}
+            hint={t('credits.hint')}
+            chevron
+            to='/credits'
+          />
+          <SettingsRow
+            icon={icon.bell}
+            label={t('notifications.title')}
+            hint={t('notifications.hint')}
+            chevron
+            to='/notifications'
+          />
+          <SettingsRow
+            icon={icon.clock}
+            label={t('reminders.title')}
+            hint={t('reminders.hint')}
+            chevron
+            to='/reminders'
           />
         </SettingsGroup>
 

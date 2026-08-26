@@ -31,6 +31,11 @@ const loaders = {
   planner: () => import('@/features/planner/pages/PlannerPage'),
   budgetForm: () => import('@/features/planner/pages/BudgetFormPage'),
   goalForm: () => import('@/features/planner/pages/GoalFormPage'),
+  credits: () => import('@/features/planner/pages/CreditsPage'),
+  creditForm: () => import('@/features/planner/pages/CreditFormPage'),
+  reminders: () => import('@/features/notifications/RemindersPage'),
+  reminderForm: () => import('@/features/notifications/ReminderFormPage'),
+  notifications: () => import('@/features/notifications/NotificationsPage'),
   pinSetup: () => import('@/features/lock/PinSetupPage'),
 } as const
 
@@ -52,6 +57,11 @@ export const CategoriesPage = lazyNamed(loaders.categories, 'CategoriesPage')
 export const PlannerPage = lazyNamed(loaders.planner, 'PlannerPage')
 export const BudgetFormPage = lazyNamed(loaders.budgetForm, 'BudgetFormPage')
 export const GoalFormPage = lazyNamed(loaders.goalForm, 'GoalFormPage')
+export const CreditsPage = lazyNamed(loaders.credits, 'CreditsPage')
+export const CreditFormPage = lazyNamed(loaders.creditForm, 'CreditFormPage')
+export const RemindersPage = lazyNamed(loaders.reminders, 'RemindersPage')
+export const ReminderFormPage = lazyNamed(loaders.reminderForm, 'ReminderFormPage')
+export const NotificationsPage = lazyNamed(loaders.notifications, 'NotificationsPage')
 export const PinSetupPage = lazyNamed(loaders.pinSetup, 'PinSetupPage')
 
 /** Предзагружает все чанки страниц (без ожидания). */

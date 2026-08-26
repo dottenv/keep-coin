@@ -21,6 +21,11 @@ import {
   PlannerPage,
   BudgetFormPage,
   GoalFormPage,
+  CreditsPage,
+  CreditFormPage,
+  RemindersPage,
+  ReminderFormPage,
+  NotificationsPage,
   TelegramRegisterPage,
   PinSetupPage,
 } from './pages'
@@ -76,6 +81,13 @@ export function AppRoutes() {
         <Route path="/planner/budgets/:id/edit" element={<Protected><BudgetFormPage /></Protected>} />
         <Route path="/planner/goals/new" element={<Protected><GoalFormPage /></Protected>} />
         <Route path="/planner/goals/:id/edit" element={<Protected><GoalFormPage /></Protected>} />
+        <Route path="/credits" element={<Protected><CreditsPage /></Protected>} />
+        <Route path="/credits/new" element={<Protected><CreditFormPage /></Protected>} />
+        <Route path="/credits/:id/edit" element={<Protected><CreditFormPage /></Protected>} />
+        <Route path="/reminders" element={<Protected><RemindersPage /></Protected>} />
+        <Route path="/reminders/new" element={<Protected><ReminderFormPage /></Protected>} />
+        <Route path="/reminders/:id/edit" element={<Protected><ReminderFormPage /></Protected>} />
+        <Route path="/notifications" element={<Protected><NotificationsPage /></Protected>} />
         <Route path="/stats" element={<Protected><StatsPage /></Protected>} />
         <Route path="/transactions" element={<Protected><AllTransactionsPage /></Protected>} />
         <Route path="/transactions/:id" element={<Protected><TransactionDetailPage /></Protected>} />

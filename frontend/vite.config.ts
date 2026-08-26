@@ -20,6 +20,11 @@ export default defineConfig({
       // autoUpdate: при появлении нового SW он self.skipWaiting + clientsClaim,
       // страница перезагружается тем же URL и остаётся в standalone.
       registerType: 'autoUpdate',
+      // Кастомный Service Worker (injectManifest): вручную добавляем обработчики
+      // push/notificationclick, при этом оставляем кеширование app-shell.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: [
         'icons/icon.svg',
         'icons/icon-192.png',
@@ -104,50 +109,9 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         cleanupOutdatedCaches: true,
-        // КРИТИЧНО для iOS: SW сразу забирает контроль над уже открытой
-        // страницей, иначе навигации не контролируются → iOS кидает в Safari.
-        clientsClaim: true,
-        skipWaiting: true,
-        // Все навигации (в т.ч. офлайн) отдаём закешированный app-shell,
-        // чтобы PWA не «выпадала» в Safari/внутренний браузер.
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /\/sw\.js$/, /\/manifest\.webmanifest$/],
-        runtimeCaching: [
-          {
-            // GET-запросы к API кешируем — ранее открытые данные доступны офлайн.
-            urlPattern: ({ url, request }) =>
-              url.pathname.startsWith('/api') && request.method === 'GET',
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'kc-api',
-              expiration: { maxEntries: 150, maxAgeSeconds: 7 * 24 * 3600 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // CSS/JS/шрифты (хешированные имена): из кеша мгновенно, в фоне обновляем.
-            urlPattern: ({ request, destination }) =>
-              destination === 'style' || destination === 'script' || destination === 'font',
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'kc-static',
-              expiration: { maxEntries: 64, maxAgeSeconds: 30 * 24 * 3600 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // Картинки: CacheFirst.
-            urlPattern: ({ request }) => request.destination === 'image',
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'kc-images',
-              expiration: { maxEntries: 64, maxAgeSeconds: 30 * 24 * 3600 },
-            },
-          },
-        ],
       },
     }),
   ],

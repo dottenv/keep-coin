@@ -19,6 +19,9 @@ export interface Budget {
   spent: number
   remaining: number
   pct: number
+  start_date: string | null
+  end_date: string | null
+  recurrence: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
   created_at: string
 }
 
@@ -30,6 +33,9 @@ export interface CreateBudgetPayload {
   kind?: 'expense' | 'income'
   category?: string | null
   is_active?: boolean
+  start_date?: string | null
+  end_date?: string | null
+  recurrence?: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
 }
 
 export type UpdateBudgetPayload = Partial<CreateBudgetPayload>
@@ -48,6 +54,9 @@ export interface SavingsGoal {
   shared: boolean
   pct: number
   needed_per_month: number
+  start_date: string | null
+  end_date: string | null
+  recurrence: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
   created_at: string
 }
 
@@ -59,6 +68,9 @@ export interface CreateGoalPayload {
   deadline?: string | null
   monthly_contribution?: number | null
   is_active?: boolean
+  start_date?: string | null
+  end_date?: string | null
+  recurrence?: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
 }
 
 export type UpdateGoalPayload = Partial<CreateGoalPayload>
@@ -101,7 +113,74 @@ export interface PlannerOverview {
   insights: PlannerInsight[]
   budgets: Budget[]
   goals: SavingsGoal[]
+  credits: Credit[]
 }
+
+export interface Credit {
+  id: string
+  name: string
+  currency: string
+  total_amount: number
+  paid_amount: number
+  remaining: number
+  payment_amount: number | null
+  interest_rate: number
+  first_payment_date: string | null
+  start_date: string | null
+  payment_day: number | null
+  notes: string | null
+  is_active: boolean
+  account_id: string | null
+  account_name: string | null
+  next_payment_date: string | null
+}
+
+export interface CreateCreditPayload {
+  name: string
+  account_id?: string | null
+  currency?: string | null
+  total_amount: number
+  interest_rate?: number
+  term_months?: number | null
+  payment_amount?: number | null
+  paid_amount?: number
+  first_payment_date?: string | null
+  start_date?: string | null
+  payment_day?: number | null
+  notes?: string | null
+  is_active?: boolean
+}
+
+export type UpdateCreditPayload = Partial<CreateCreditPayload>
+
+export interface Reminder {
+  id: string
+  type: 'generic' | 'budget' | 'goal' | 'credit'
+  title: string
+  body: string
+  due_at: string
+  timezone: string
+  recurrence: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+  enabled: boolean
+  related_type: string | null
+  related_id: string | null
+  last_fired_at: string | null
+  created_at: string
+}
+
+export interface CreateReminderPayload {
+  type?: 'generic' | 'budget' | 'goal' | 'credit'
+  title: string
+  body?: string
+  due_at: string
+  timezone?: string
+  recurrence?: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+  enabled?: boolean
+  related_type?: string | null
+  related_id?: string | null
+}
+
+export type UpdateReminderPayload = Partial<CreateReminderPayload>
 
 interface BudgetsResponse {
   budgets: Budget[]
@@ -153,4 +232,75 @@ export async function updateGoal(
 
 export async function deleteGoal(id: string): Promise<{ ok: boolean }> {
   return api<{ ok: boolean }>(`/api/goals/${id}`, { method: 'DELETE' })
+}
+
+// ---------- Кредиты ----------
+
+interface CreditsResponse {
+  credits: Credit[]
+}
+
+export async function fetchCredits(): Promise<Credit[]> {
+  const body = await api<CreditsResponse>('/api/credits')
+  return body.credits
+}
+
+export async function createCredit(payload: CreateCreditPayload): Promise<Credit> {
+  return api<Credit>('/api/credits', { method: 'POST', json: payload })
+}
+
+export async function updateCredit(
+  id: string,
+  payload: UpdateCreditPayload,
+): Promise<Credit> {
+  return api<Credit>(`/api/credits/${id}`, { method: 'PATCH', json: payload })
+}
+
+export async function deleteCredit(id: string): Promise<{ ok: boolean }> {
+  return api<{ ok: boolean }>(`/api/credits/${id}`, { method: 'DELETE' })
+}
+
+// ---------- Напоминания ----------
+
+interface RemindersResponse {
+  reminders: Reminder[]
+}
+
+export async function fetchReminders(): Promise<Reminder[]> {
+  const body = await api<RemindersResponse>('/api/reminders')
+  return body.reminders
+}
+
+export async function createReminder(payload: CreateReminderPayload): Promise<Reminder> {
+  return api<Reminder>('/api/reminders', { method: 'POST', json: payload })
+}
+
+export async function updateReminder(
+  id: string,
+  payload: UpdateReminderPayload,
+): Promise<Reminder> {
+  return api<Reminder>(`/api/reminders/${id}`, { method: 'PATCH', json: payload })
+}
+
+export async function deleteReminder(id: string): Promise<{ ok: boolean }> {
+  return api<{ ok: boolean }>(`/api/reminders/${id}`, { method: 'DELETE' })
+}
+
+export async function sendReminderNow(id: string): Promise<{ ok: boolean }> {
+  return api<{ ok: boolean }>(`/api/reminders/${id}/send`, { method: 'POST' })
+}
+
+// ---------- Часовой пояс пользователя ----------
+
+export async function fetchUserTimezone(): Promise<string> {
+  const data = await api<{ timezone: string }>('/api/settings/timezone')
+  return data.timezone
+}
+
+export async function saveUserTimezone(timezone: string): Promise<string> {
+  const data = await api<{ timezone: string }>('/api/settings/timezone', {
+    method: 'PUT',
+    json: { timezone },
+  })
+  return data.timezone
 }
