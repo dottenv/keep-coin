@@ -9,7 +9,7 @@ from aiogram.types import (
     WebAppInfo,
 )
 
-from bot.config import config
+from config import config
 
 router = Router()
 

@@ -3,8 +3,8 @@ from __future__ import annotations
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 
-from bot.config import config
-from bot.handlers import router as handlers_router
+from config import config
+from handlers import router as handlers_router
 
 
 async def main() -> None:
