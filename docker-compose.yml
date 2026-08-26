@@ -20,10 +20,10 @@ services:
       # CloudPub отдаёт HTTPS — куки должны помечаться как Secure.
       JWT_COOKIE_SECURE: "true"
       JWT_COOKIE_SAMESITE: Lax
-      # Telegram Mini App (опционально — без токена эндпоинты /telegram/* отвечают 401).
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
-      WEBAPP_URL: ${WEBAPP_URL:-}
+    env_file:
+      # Telegram Mini App: SECRET_KEY и т.п. берутся из корневого окружения
+      # (SECRET_KEY/CLOUDPUB_TOKEN), а TELEGRAM_* — из backend/.env приложения.
+      - ./backend/.env
     volumes:
       - ./backend:/app
       - keep_coin_db:/data
@@ -88,10 +88,10 @@ services:
     image: keep-coin-bot
     restart: unless-stopped
     profiles: ["bot"]
-    environment:
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?Set TELEGRAM_BOT_TOKEN in .env (see .env.example)}
-      WEBAPP_URL: ${WEBAPP_URL:?Set WEBAPP_URL in .env (see .env.example)}
-      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:?Set TELEGRAM_BOT_USERNAME in .env (see .env.example)}
+    env_file:
+      # Все настройки бота (TELEGRAM_BOT_TOKEN, WEBAPP_URL, TELEGRAM_BOT_USERNAME)
+      # читаются из bot/.env — отдельный корневой .env для них не нужен.
+      - ./bot/.env
     volumes:
       - ./bot:/app
     command: python main.py
