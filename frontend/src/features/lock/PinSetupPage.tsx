@@ -31,21 +31,25 @@ export function PinSetupPage() {
   } = useLock()
 
   const [step, setStep] = useState<Step>('menu')
+  // draft — то, что сейчас набирается на экранной клавиатуре (видимое поле).
+  // saved — эталон для сверки: первый введённый PIN (create/change) либо старый PIN (change).
   const [draft, setDraft] = useState('')
+  const [saved, setSaved] = useState('')
   const [oldPin, setOldPin] = useState('')
   const [error, setError] = useState(false)
   const [busy, setBusy] = useState(false)
 
   const reset = (next: Step) => {
     setDraft('')
+    setSaved('')
     setOldPin('')
     setError(false)
     setStep(next)
   }
 
-  const finishCreate = async (value: string) => {
+  const submitCreate = async (value: string) => {
     if (busy) return
-    if (value !== draft) {
+    if (value !== saved) {
       setError(true)
       setDraft('')
       return
@@ -57,9 +61,9 @@ export function PinSetupPage() {
     reset('menu')
   }
 
-  const finishChange = async (value: string) => {
+  const submitChange = async (value: string) => {
     if (busy) return
-    if (value !== draft) {
+    if (value !== saved) {
       setError(true)
       setDraft('')
       return
@@ -70,6 +74,7 @@ export function PinSetupPage() {
     if (!ok) {
       setError(true)
       setDraft('')
+      setSaved('')
       setOldPin('')
       setStep('changeOld')
       return
@@ -85,7 +90,9 @@ export function PinSetupPage() {
     setBusy(false)
     if (ok) {
       setOldPin(value)
-      reset('changeNew')
+      setDraft('')
+      setError(false)
+      setStep('changeNew')
     } else {
       setError(true)
       setDraft('')
@@ -118,6 +125,38 @@ export function PinSetupPage() {
       : step === 'create' || step === 'createConfirm'
         ? t('lock.createTitle')
         : t('lock.changeTitle')
+
+  const onComplete = (v: string) => {
+    if (step === 'create') {
+      setSaved(v)
+      setDraft('')
+      setError(false)
+      setStep('createConfirm')
+    } else if (step === 'createConfirm') {
+      void submitCreate(v)
+    } else if (step === 'changeOld') {
+      void verifyOld(v)
+    } else if (step === 'changeNew') {
+      setSaved(v)
+      setDraft('')
+      setError(false)
+      setStep('changeConfirm')
+    } else if (step === 'changeConfirm') {
+      void submitChange(v)
+    }
+  }
+
+  const hint = error
+    ? t('lock.mismatch')
+    : step === 'create'
+      ? t('lock.createHint')
+      : step === 'createConfirm'
+        ? t('lock.confirmHint')
+        : step === 'changeOld'
+          ? t('lock.currentPinHint')
+          : step === 'changeNew'
+            ? t('lock.createHint')
+            : t('lock.confirmHint')
 
   return (
     <AppShell>
@@ -222,39 +261,11 @@ export function PinSetupPage() {
                 setError(false)
                 setDraft(v)
               }}
-              onComplete={(v) => {
-                if (step === 'create') {
-                  setDraft(v)
-                  setError(false)
-                  setStep('createConfirm')
-                } else if (step === 'createConfirm') {
-                  void finishCreate(v)
-                } else if (step === 'changeOld') {
-                  void verifyOld(v)
-                } else if (step === 'changeNew') {
-                  setDraft(v)
-                  setError(false)
-                  setStep('changeConfirm')
-                } else if (step === 'changeConfirm') {
-                  void finishChange(v)
-                }
-              }}
+              onComplete={onComplete}
               length={PIN_LENGTH}
               disabled={busy}
               error={error}
-              hint={
-                error
-                  ? t('lock.mismatch')
-                  : step === 'create'
-                    ? t('lock.createHint')
-                    : step === 'createConfirm'
-                      ? t('lock.confirmHint')
-                      : step === 'changeOld'
-                        ? t('lock.currentPinHint')
-                        : step === 'changeNew'
-                          ? t('lock.createHint')
-                          : t('lock.confirmHint')
-              }
+              hint={hint}
             />
 
             <Button

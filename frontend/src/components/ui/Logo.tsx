@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 import { cn } from '@/lib/cn'
 
 interface LogoProps {
@@ -23,7 +25,7 @@ export function Logo({
   withWordmark = false,
   title = 'Keep Coin',
 }: LogoProps) {
-  const gradientId = 'kc-logo-grad'
+  const gradientId = `kc-${useId().replace(/:/g, '')}`
 
   const mark = (
     <svg
