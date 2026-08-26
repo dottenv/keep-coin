@@ -24,33 +24,61 @@ export interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
+const MAX_VISIBLE = 4
+const VISIBLE_MS = 4000
+const EXIT_MS = 220
+
 const toneClasses: Record<Tone, string> = {
   success:
-    'border-brand-200/70 bg-brand-50/80 text-brand-800 backdrop-blur-xl dark:border-brand-400/30 dark:bg-brand-500/15 dark:text-brand-200',
+    'border-brand-200/70 bg-brand-50/85 text-brand-800 backdrop-blur-2xl dark:border-brand-400/30 dark:bg-brand-500/20 dark:text-brand-100',
   error:
-    'border-red-200/70 bg-red-50/80 text-red-700 backdrop-blur-xl dark:border-red-400/30 dark:bg-red-500/15 dark:text-red-200',
-  info: 'glass-chip text-ink-700 dark:text-ink-200',
+    'border-red-200/70 bg-red-50/85 text-red-700 backdrop-blur-2xl dark:border-red-400/30 dark:bg-red-500/20 dark:text-red-100',
+  info: 'glass-chip text-ink-700 dark:text-ink-100',
 }
 
 const toneDot: Record<Tone, string> = {
   success: 'bg-brand-500',
   error: 'bg-red-500',
-  info: 'bg-ink-400 dark:bg-ink-400',
+  info: 'bg-ink-400 dark:bg-ink-300',
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
+  const [leaving, setLeaving] = useState<Set<number>>(new Set())
   const nextId = useRef(0)
+  const timers = useRef<Map<number, number>>(new Map())
 
-  const dismiss = useCallback((id: number) => {
+  const remove = useCallback((id: number) => {
     setToasts((items) => items.filter((t) => t.id !== id))
+    setLeaving((prev) => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+    const handle = timers.current.get(id)
+    if (handle) {
+      window.clearTimeout(handle)
+      timers.current.delete(id)
+    }
   }, [])
+
+  const dismiss = useCallback(
+    (id: number) => {
+      // Запускаем плавное исчезновение, затем удаляем из дерева.
+      setLeaving((prev) => new Set(prev).add(id))
+      const handle = window.setTimeout(() => remove(id), EXIT_MS)
+      timers.current.set(id, handle)
+    },
+    [remove],
+  )
 
   const show = useCallback(
     (message: string, tone: Tone = 'info') => {
       const id = ++nextId.current
-      setToasts((items) => [...items.slice(-2), { id, tone, message }])
-      window.setTimeout(() => dismiss(id), 3500)
+      setToasts((items) => [{ id, tone, message }, ...items].slice(0, MAX_VISIBLE))
+      const handle = window.setTimeout(() => dismiss(id), VISIBLE_MS)
+      timers.current.set(id, handle)
     },
     [dismiss],
   )
@@ -62,21 +90,29 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4"
+        // Под Dynamic Island: минимум 56px, иначе — отступ под статус-бар.
+        style={{ top: 'max(56px, calc(env(safe-area-inset-top, 0px) + 14px))' }}
+        className="pointer-events-none fixed inset-x-0 z-[60] flex flex-col items-center gap-2 px-4"
       >
-        {toasts.map((toast) => (
-          <button
-            key={toast.id}
-            onClick={() => dismiss(toast.id)}
-            className={cn(
-              'pointer-events-auto flex w-full max-w-sm items-center gap-2.5 rounded-xl border px-4 py-3 text-left text-sm font-medium shadow-soft animate-toast-in',
-              toneClasses[toast.tone],
-            )}
-          >
-            <span className={cn('h-2 w-2 shrink-0 rounded-full', toneDot[toast.tone])} />
-            {toast.message}
-          </button>
-        ))}
+        {toasts.map((toast) => {
+          const isLeaving = leaving.has(toast.id)
+          return (
+            <button
+              key={toast.id}
+              onClick={() => dismiss(toast.id)}
+              className={cn(
+                'pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-medium shadow-soft',
+                isLeaving ? 'animate-toast-out' : 'animate-toast-in',
+                toneClasses[toast.tone],
+              )}
+            >
+              <span
+                className={cn('h-2.5 w-2.5 shrink-0 rounded-full', toneDot[toast.tone])}
+              />
+              <span className="min-w-0 flex-1 leading-snug">{toast.message}</span>
+            </button>
+          )
+        })}
       </div>
     </ToastContext.Provider>
   )

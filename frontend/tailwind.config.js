@@ -81,8 +81,12 @@ export default {
           '50%': { transform: 'translateY(-14px)' },
         },
         'toast-in': {
-          from: { opacity: '0', transform: 'translateY(-12px) scale(0.98)' },
+          from: { opacity: '0', transform: 'translateY(-14px) scale(0.96)' },
           to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        'toast-out': {
+          from: { opacity: '1', transform: 'translateY(0) scale(1)' },
+          to: { opacity: '0', transform: 'translateY(-10px) scale(0.96)' },
         },
         spin: {
           to: { transform: 'rotate(360deg)' },
@@ -92,7 +96,8 @@ export default {
         'fade-in': 'fade-in 0.35s ease-out both',
         'fade-in-up': 'fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
         'scale-in': 'scale-in 0.25s ease-out both',
-        'toast-in': 'toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'toast-in': 'toast-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'toast-out': 'toast-out 0.22s ease-in both',
         'float': 'float 7s ease-in-out infinite',
         spin: 'spin 0.8s linear infinite',
       },
