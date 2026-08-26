@@ -70,6 +70,10 @@ class TelegramLoginSchema(Schema):
     init_data = fields.Str(required=True, error_messages={"required": "init_data_required"})
 
 
+class TelegramAutoSchema(Schema):
+    init_data = fields.Str(required=True, error_messages={"required": "init_data_required"})
+
+
 class TelegramRegisterSchema(Schema):
     init_data = fields.Str(required=True, error_messages={"required": "init_data_required"})
     email = fields.Email(required=True, error_messages={"required": "email_required", "invalid": EMAIL_CODE})

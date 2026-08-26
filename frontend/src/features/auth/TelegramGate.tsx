@@ -44,8 +44,8 @@ export function TelegramGate() {
     }
 
     telegramAutoLogin().then((status) => {
-      if (status === 'new') {
-        navigate('/telegram/register', { replace: true })
+      if (status === 'ok') {
+        navigate('/', { replace: true })
       }
     })
     // Запускаем один раз при монтировании.

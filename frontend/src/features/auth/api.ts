@@ -64,6 +64,10 @@ export function telegramLogin(initData: string): Promise<TelegramLoginResult> {
   return api('/api/auth/telegram/login', { method: 'POST', json: { init_data: initData } })
 }
 
+export function telegramAuto(initData: string): Promise<User> {
+  return api('/api/auth/telegram/auto', { method: 'POST', json: { init_data: initData } })
+}
+
 export interface TelegramRegisterPayload {
   init_data: string
   email: string

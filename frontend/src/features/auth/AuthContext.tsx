@@ -44,10 +44,10 @@ interface AuthContextValue extends Session {
   /** Данные Telegram-пользователя, ожидающие завершения регистрации. */
   telegramPending: TelegramProfile | null
   /**
-   * Автоматический вход через Telegram WebApp: если аккаунт уже привязан —
-   * авторизует, иначе сохраняет telegramPending для экрана регистрации.
+   * Автоматический вход через Telegram WebApp: привязанный аккаунт
+   * авторизует, непривязанный — создаётся и авторизуется автоматически.
    */
-  telegramAutoLogin: () => Promise<'ok' | 'new' | 'none'>
+  telegramAutoLogin: () => Promise<'ok' | 'none'>
   telegramRegister: (payload: authApi.TelegramRegisterPayload) => Promise<void>
   telegramLink: (initData: string, linkToken: string) => Promise<void>
 }
@@ -103,19 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  const telegramAutoLogin = useCallback(async (): Promise<'ok' | 'new' | 'none'> => {
+  const telegramAutoLogin = useCallback(async (): Promise<'ok' | 'none'> => {
     const initData = getTelegramInitData()
     if (!initData) return 'none'
     try {
-      const result = await authApi.telegramLogin(initData)
-      if (result.status === 'ok' && result.user) {
-        dispatch({ type: 'set_user', user: result.user })
-        setTelegramPending(null)
-        return 'ok'
-      } else if (result.status === 'new' && result.telegram) {
-        setTelegramPending(result.telegram)
-        return 'new'
-      }
+      const user = await authApi.telegramAuto(initData)
+      dispatch({ type: 'set_user', user })
+      setTelegramPending(null)
+      return 'ok'
     } catch {
       /* оставляем пользователя в гостевом режиме */
     }

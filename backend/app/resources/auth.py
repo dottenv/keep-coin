@@ -12,6 +12,7 @@ from app.schemas import (
     RegisterSchema,
     TelegramLinkSchema,
     TelegramLoginSchema,
+    TelegramAutoSchema,
     TelegramRegisterSchema,
     UpdateProfileSchema,
     user_out_schema,
@@ -120,6 +121,39 @@ def telegram_login():
         return jsonify(user_out_schema.dump(user))
 
     return jsonify(status="new", telegram=extract_telegram_data(data["init_data"])), 200
+
+
+@bp.post("/telegram/auto")
+def telegram_auto():
+    """Автоматический вход/регистрация через Telegram Mini App.
+
+    Если аккаунт уже привязан к этому Telegram ID — авторизует.
+    Иначе создаёт аккаунт по данным Telegram (без пароля) и авторизует.
+    Таким образом открытие Mini App из Telegram не требует форм.
+    """
+    data = TelegramAutoSchema().load(_normalize_payload())
+    tg = _verify_telegram(data["init_data"])
+    if tg is None:
+        return jsonify(error="invalid_init_data"), 401
+
+    user = UserService.get_by_telegram_id(tg.get("id"))
+    if user and user.is_active:
+        stage_auth_tokens(str(user.id))
+        return jsonify(user_out_schema.dump(user))
+
+    lang = (tg.get("language_code") or "ru") or "ru"
+    locale = "en" if str(lang).lower().startswith("en") else "ru"
+
+    if user:
+        # Существует, но неактивен — реактивируем и обновляем профиль.
+        user.is_active = True
+        UserService._apply_telegram_data(user, tg)
+        db.session.commit()
+    else:
+        user = UserService.create_from_telegram_auto(tg, locale)
+
+    stage_auth_tokens(str(user.id))
+    return jsonify(user_out_schema.dump(user)), 201
 
 
 @bp.post("/telegram/register")

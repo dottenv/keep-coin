@@ -61,6 +61,30 @@ class UserService:
         return user
 
     @staticmethod
+    def create_from_telegram_auto(telegram_data: dict, locale: str = "ru") -> User:
+        """Создаёт аккаунт по данным Telegram без пароля (вход по init_data).
+
+        Используется для автоматической регистрации при открытии Mini App.
+        Email генерируется как уникальный плейсхолдер.
+        """
+        tg_id = str(telegram_data.get("id"))
+        first = telegram_data.get("first_name") or ""
+        last = telegram_data.get("last_name") or ""
+        username = telegram_data.get("username")
+        display_name = f"{first} {last}".strip() or username or f"User {tg_id}"
+
+        user = User(
+            email=f"tg_{tg_id}@keepcoin.local",
+            password_hash=None,
+            display_name=display_name,
+            locale=locale,
+        )
+        UserService._apply_telegram_data(user, telegram_data)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+    @staticmethod
     def link_telegram(user: User, telegram_data: dict) -> User:
         UserService._apply_telegram_data(user, telegram_data)
         user.telegram_link_token = None
