@@ -40,49 +40,54 @@ const ITEMS: NavItem[] = [
   },
 ]
 
-/** Нижняя навигация: летающая, скруглённая. */
+/** Нижняя навигация: приклеенная панель во всю ширину. */
 export function BottomNav() {
   const { t } = useTranslation()
 
   return (
     <nav
-      aria-label="Primary"
-      className="pointer-events-none fixed inset-x-0 z-30 flex justify-center"
+      aria-label='Primary'
+      className='fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/80 backdrop-blur-2xl dark:border-white/10 dark:bg-ink-900/80'
       style={{
-        bottom: 'calc(1rem + max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-bottom, 0px)))',
-        paddingLeft: 'calc(1rem + max(env(safe-area-inset-left, 0px), var(--tg-safe-area-left, 0px)))',
-        paddingRight:
-          'calc(1rem + max(env(safe-area-inset-right, 0px), var(--tg-safe-area-right, 0px)))',
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-bottom, 0px))',
       }}
     >
-      <div         className="pointer-events-auto flex w-full max-w-md items-center justify-around rounded-[1.75rem] border border-white/60 bg-white/80 p-2 shadow-lifted backdrop-blur-xl animate-fade-in-up dark:border-white/10 dark:bg-ink-900/60 dark:shadow-[0_10px_40px_rgba(2,6,23,0.5)]">
+      <div className='mx-auto flex w-full max-w-md items-stretch justify-around'>
         {ITEMS.map((item) => (
-          <NavLink
-            key={item.key}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              cn(
-                'pressable flex flex-col items-center gap-0.5 rounded-2xl px-3.5 py-1.5 text-[0.65rem] font-semibold transition-colors',
-                isActive
-                  ? 'bg-brand-50/80 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300'
-                  : 'text-ink-400 hover:text-ink-700 dark:hover:text-ink-200',
-              )
-            }
-            onClick={() => haptics.navigation()}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d={item.icon} />
-            </svg>
-            {t(item.labelKey)}
+          <NavLink key={item.key} to={item.to} end={item.end}>
+            {({ isActive }) => (
+              <span
+                onClick={() => haptics.navigation()}
+                className={cn(
+                  'pressable flex flex-1 cursor-pointer flex-col items-center gap-0.5 py-2.5 text-[0.65rem] font-semibold transition-colors',
+                  isActive
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-ink-400 hover:text-ink-700 dark:text-ink-500 dark:hover:text-ink-200',
+                )}
+              >
+                <span
+                  className={cn(
+                    'mb-0.5 grid h-9 w-14 place-items-center rounded-full transition-colors',
+                    isActive
+                      ? 'bg-brand-50/80 dark:bg-brand-500/15'
+                      : 'bg-transparent',
+                  )}
+                >
+                  <svg
+                    viewBox='0 0 24 24'
+                    className='h-5 w-5'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                  >
+                    <path d={item.icon} />
+                  </svg>
+                </span>
+                {t(item.labelKey)}
+              </span>
+            )}
           </NavLink>
         ))}
       </div>
