@@ -34,6 +34,9 @@ export function GoalFormPage() {
   const [deadline, setDeadline] = useState('')
   const [contribution, setContribution] = useState('')
   const [accountId, setAccountId] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'>('none')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -44,6 +47,9 @@ export function GoalFormPage() {
     setDeadline(editing.deadline ?? '')
     setContribution(editing.monthly_contribution ? String(editing.monthly_contribution) : '')
     setAccountId(editing.account_id ?? '')
+    setStartDate(editing.start_date ?? '')
+    setEndDate(editing.end_date ?? '')
+    setRecurrence(editing.recurrence ?? 'none')
   }, [editing])
 
   const invalidate = () => {
@@ -102,6 +108,9 @@ export function GoalFormPage() {
       deadline: deadline || null,
       monthly_contribution: contribution === '' ? null : parseAmount(contribution),
       account_id: accountId || null,
+      start_date: startDate || null,
+      end_date: endDate || null,
+      recurrence,
     })
   }
 
@@ -175,6 +184,38 @@ export function GoalFormPage() {
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
             />
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label={t('plans.startDate')}
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <Input
+                label={t('plans.endDate')}
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+
+            <Select
+              label={t('plans.recurrence')}
+              value={recurrence}
+              onChange={(e) =>
+                setRecurrence(
+                  e.target.value as 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',
+                )
+              }
+            >
+              <option value="none">{t('plans.recurrenceNone')}</option>
+              <option value="daily">{t('plans.recurrenceDaily')}</option>
+              <option value="weekly">{t('plans.recurrenceWeekly')}</option>
+              <option value="monthly">{t('plans.recurrenceMonthly')}</option>
+              <option value="quarterly">{t('plans.recurrenceQuarterly')}</option>
+              <option value="yearly">{t('plans.recurrenceYearly')}</option>
+            </Select>
 
             <Select label={t('goals.account')} value={accountId} onChange={(e) => setAccountId(e.target.value)}>
               <option value="">{t('goals.accountNone')}</option>

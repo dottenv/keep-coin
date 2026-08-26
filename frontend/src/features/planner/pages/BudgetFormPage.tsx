@@ -48,6 +48,9 @@ export function BudgetFormPage() {
   const [kind, setKind] = useState<'expense' | 'income'>('expense')
   const [accountId, setAccountId] = useState('')
   const [category, setCategory] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'>('none')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -58,6 +61,9 @@ export function BudgetFormPage() {
     setKind(editing.kind ?? 'expense')
     setAccountId(editing.account_id ?? '')
     setCategory(editing.category ?? '')
+    setStartDate(editing.start_date ?? '')
+    setEndDate(editing.end_date ?? '')
+    setRecurrence(editing.recurrence ?? 'none')
   }, [editing])
 
   const invalidate = () => {
@@ -119,6 +125,9 @@ export function BudgetFormPage() {
       kind,
       account_id: accountId || null,
       category: category || null,
+      start_date: startDate || null,
+      end_date: endDate || null,
+      recurrence,
     })
   }
 
@@ -200,6 +209,38 @@ export function BudgetFormPage() {
                   {option.label}
                 </option>
               ))}
+            </Select>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label={t('plans.startDate')}
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <Input
+                label={t('plans.endDate')}
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+
+            <Select
+              label={t('plans.recurrence')}
+              value={recurrence}
+              onChange={(e) =>
+                setRecurrence(
+                  e.target.value as 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly',
+                )
+              }
+            >
+              <option value="none">{t('plans.recurrenceNone')}</option>
+              <option value="daily">{t('plans.recurrenceDaily')}</option>
+              <option value="weekly">{t('plans.recurrenceWeekly')}</option>
+              <option value="monthly">{t('plans.recurrenceMonthly')}</option>
+              <option value="quarterly">{t('plans.recurrenceQuarterly')}</option>
+              <option value="yearly">{t('plans.recurrenceYearly')}</option>
             </Select>
 
             <p className="text-xs text-ink-400">{t('budgets.accountHint')}</p>
