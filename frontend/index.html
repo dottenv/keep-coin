@@ -9,7 +9,20 @@
     />
     <meta name="theme-color" content="#059669" />
     <meta name="description" content="Keep Coin — учёт личных и семейных финансов" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Keep Coin" />
     <title>Keep Coin</title>
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-375x667.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-375x812.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-390x844.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-393x852.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-414x896.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-428x926.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-430x932.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-440x956.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
     <script>
       // Применить сохранённую тему до первого рендера (исключает «мигание»).
       try {
@@ -33,9 +46,57 @@
         background: #04060f;
         color: #e2e8f0;
       }
+      /* Мгновенный сплэш до загрузки JS-бандла (устраняет белую вспышку
+         и дублирует нативный splash iOS). Скрывается из App после маунта. */
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: linear-gradient(155deg, #34d399 0%, #10b981 55%, #059669 100%);
+        transition: opacity 0.35s ease;
+      }
+      #boot-splash.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot-splash svg {
+        width: 96px;
+        height: 96px;
+        filter: drop-shadow(0 10px 30px rgba(2, 6, 23, 0.25));
+        animation: boot-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      #boot-splash .word {
+        color: #fff;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.5px;
+        opacity: 0.95;
+      }
+      @keyframes boot-pop {
+        from { transform: scale(0.85); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
     </style>
   </head>
   <body>
+    <div id="boot-splash">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="512" height="512" rx="116" fill="#ffffff" opacity="0.12" />
+        <g fill="none" stroke="#ffffff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M132 150 V362" />
+          <path d="M132 256 L250 150" />
+          <path d="M132 256 L250 362" />
+          <path d="M352 182 A92 92 0 1 0 352 330" />
+        </g>
+      </svg>
+      <span class="word">Keep Coin</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

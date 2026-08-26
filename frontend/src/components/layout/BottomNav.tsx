@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/cn'
+import { haptics } from '@/lib/haptics'
 
 interface NavItem {
   key: string
@@ -67,6 +68,7 @@ export function BottomNav() {
                   : 'text-ink-400 hover:text-ink-700 dark:hover:text-ink-200',
               )
             }
+            onClick={() => haptics.navigation()}
           >
             <svg
               viewBox="0 0 24 24"

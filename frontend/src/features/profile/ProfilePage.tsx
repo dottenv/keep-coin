@@ -14,6 +14,7 @@ import { useAuth } from '@/features/auth/AuthContext'
 import { notifyError } from '@/features/auth/errors'
 import { createTelegramLinkToken } from '@/features/auth/api'
 import { openTelegramLink } from '@/lib/telegram'
+import { useLock } from '@/features/lock/LockContext'
 import { wipeAllData } from '@/features/settings/api'
 import { fetchAccounts } from '@/features/accounts/api'
 import { fetchCategories } from '@/features/categories/api'
@@ -62,6 +63,12 @@ const smallIcon = {
   shield: (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5z" />
+    </svg>
+  ),
+  lock: (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
     </svg>
   ),
   telegram: (
@@ -140,6 +147,7 @@ export function ProfilePage() {
   const { t, i18n } = useTranslation()
   const { user, updateProfile, logout } = useAuth()
   const { theme, setTheme } = useTheme()
+  const { pinSet } = useLock()
   const toast = useToast()
   const navigate = useNavigate()
 
@@ -379,6 +387,33 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
+          </Card>
+        </section>
+
+        {/* ── Безопасность ───────────────────────────────────────────── */}
+        <section className='animate-fade-in-up' style={{ animationDelay: '135ms' }}>
+          <SectionTitle icon={smallIcon.lock}>{t('lock.section')}</SectionTitle>
+          <Card className='p-2'>
+            <button
+              type='button'
+              onClick={() => navigate('/lock/setup')}
+              className='pressable flex w-full items-center gap-3 rounded-2xl p-3 text-left transition-colors hover:bg-ink-50 dark:hover:bg-white/[0.04]'
+            >
+              <span className='grid h-10 w-10 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400'>
+                {smallIcon.lock}
+              </span>
+              <span className='min-w-0 flex-1'>
+                <span className='block text-sm font-semibold text-ink-800 dark:text-ink-100'>
+                  {t('lock.openSettings')}
+                </span>
+                <span className='block text-xs text-ink-400'>
+                  {pinSet ? t('lock.statusOn') : t('lock.statusOff')}
+                </span>
+              </span>
+              <svg viewBox='0 0 24 24' className='h-4 w-4 shrink-0 text-ink-300 dark:text-ink-500' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                <path d='M9 18l6-6-6-6' />
+              </svg>
+            </button>
           </Card>
         </section>
 

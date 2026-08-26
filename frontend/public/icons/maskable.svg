@@ -6,15 +6,12 @@
       <stop offset="1" stop-color="#059669" />
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="116" fill="url(#kc-g)" />
-  <!-- мягкое бликовое пятно для «стеклянного» объёма -->
-  <circle cx="170" cy="150" r="120" fill="#ffffff" opacity="0.10" />
-  <g fill="none" stroke="#ffffff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round">
-    <!-- K -->
+  <!-- maskable: заливка на всю площадь (обрезается маской), контент в safe-zone -->
+  <rect width="512" height="512" fill="url(#kc-g)" />
+  <g fill="none" stroke="#ffffff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 0)">
     <path d="M132 150 V362" />
     <path d="M132 256 L250 150" />
     <path d="M132 256 L250 362" />
-    <!-- C (раскрытие справа) -->
     <path d="M352 182 A92 92 0 1 0 352 330" />
   </g>
 </svg>

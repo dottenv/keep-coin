@@ -31,6 +31,7 @@ const loaders = {
   planner: () => import('@/features/planner/pages/PlannerPage'),
   budgetForm: () => import('@/features/planner/pages/BudgetFormPage'),
   goalForm: () => import('@/features/planner/pages/GoalFormPage'),
+  pinSetup: () => import('@/features/lock/PinSetupPage'),
 } as const
 
 export const LoginPage = lazyNamed(loaders.login, 'LoginPage')
@@ -51,6 +52,7 @@ export const CategoriesPage = lazyNamed(loaders.categories, 'CategoriesPage')
 export const PlannerPage = lazyNamed(loaders.planner, 'PlannerPage')
 export const BudgetFormPage = lazyNamed(loaders.budgetForm, 'BudgetFormPage')
 export const GoalFormPage = lazyNamed(loaders.goalForm, 'GoalFormPage')
+export const PinSetupPage = lazyNamed(loaders.pinSetup, 'PinSetupPage')
 
 /** Предзагружает все чанки страниц (без ожидания). */
 export function prefetchAllRoutes(): void {

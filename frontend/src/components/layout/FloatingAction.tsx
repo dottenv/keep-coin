@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { cn } from '@/lib/cn'
+import { haptics } from '@/lib/haptics'
 
 const HOLD_MS = 600
 
@@ -88,7 +89,10 @@ export function FloatingAction() {
     setHolding(false)
     clearHoldTimer()
     if (!longFired.current) {
+      haptics.impact()
       setOpen((value) => !value)
+    } else {
+      haptics.impact()
     }
   }
 
@@ -101,6 +105,7 @@ export function FloatingAction() {
   }
 
   const onAction = (action: FabAction) => {
+    haptics.impact()
     setOpen(false)
     navigate(`/add?type=${action.type}`)
   }

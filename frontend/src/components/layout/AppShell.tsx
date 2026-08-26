@@ -8,6 +8,7 @@ import { displayInitials } from '@/lib/format'
 import { BottomNav } from './BottomNav'
 import { GlassBackground } from './GlassBackground'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { Logo } from '@/components/ui/Logo'
 
 /** Каркас авторизованной части приложения: фон, шапка, контент и нижняя навигация. */
 export function AppShell({ children }: { children: ReactNode }) {
@@ -30,19 +31,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       >
         <header className="flex min-w-0 items-center gap-3 animate-fade-in">
           <Link to="/" className="flex min-w-0 shrink-0 items-center gap-3" title={t('common.appName')}>
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-soft">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="8.5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="3.5 8"
-                  strokeLinecap="round"
-                />
-                <path d="M12 5.5 v4.5 h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl shadow-soft">
+              <Logo size={40} variant="tile" />
             </span>
             {user ? (
               <span className="hidden text-sm font-semibold text-ink-400 dark:text-ink-400 sm:inline">

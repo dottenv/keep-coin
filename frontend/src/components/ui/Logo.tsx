@@ -1,0 +1,73 @@
+import { cn } from '@/lib/cn'
+
+interface LogoProps {
+  /** Размер в пикселях (квадрат). */
+  size?: number
+  /** Плитка с заливкой-градиентом (иконка) или только монограмма (для шапки на фоне). */
+  variant?: 'tile' | 'mark'
+  className?: string
+  /** Показывать подпись «Keep Coin» справа от плитки. */
+  withWordmark?: boolean
+  title?: string
+}
+
+/**
+ * Фирменный знак Keep Coin — монограмма «KC» в стиле приложения
+ * (градиент brand + стеклянный блик). Единый источник для шапки,
+ * экрана блокировки, сплэша и манифеста.
+ */
+export function Logo({
+  size = 40,
+  variant = 'tile',
+  className,
+  withWordmark = false,
+  title = 'Keep Coin',
+}: LogoProps) {
+  const gradientId = 'kc-logo-grad'
+
+  const mark = (
+    <svg
+      viewBox="0 0 512 512"
+      width={size}
+      height={size}
+      role="img"
+      aria-label={title}
+      className={cn(withWordmark && 'shrink-0', className)}
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#34d399" />
+          <stop offset="0.55" stop-color="#10b981" />
+          <stop offset="1" stop-color="#059669" />
+        </linearGradient>
+      </defs>
+      {variant === 'tile' ? (
+        <rect width="512" height="512" rx="116" fill={`url(#${gradientId})`} />
+      ) : null}
+      <circle cx="170" cy="150" r="120" fill="#ffffff" opacity={variant === 'tile' ? 0.1 : 0} />
+      <g
+        fill="none"
+        stroke={variant === 'tile' ? '#ffffff' : 'currentColor'}
+        strokeWidth="50"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M132 150 V362" />
+        <path d="M132 256 L250 150" />
+        <path d="M132 256 L250 362" />
+        <path d="M352 182 A92 92 0 1 0 352 330" />
+      </g>
+    </svg>
+  )
+
+  if (!withWordmark) return mark
+
+  return (
+    <span className="flex items-center gap-2.5">
+      {mark}
+      <span className="text-lg font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
+        Keep Coin
+      </span>
+    </span>
+  )
+}

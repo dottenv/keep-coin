@@ -1,7 +1,8 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { forwardRef, type ButtonHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 
 import { Spinner } from './Spinner'
 import { cn } from '@/lib/cn'
+import { haptics } from '@/lib/haptics'
 
 type Variant = 'primary' | 'outline' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
@@ -32,13 +33,18 @@ const sizeClasses: Record<Size, string> = {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { variant = 'primary', size = 'md', loading, fullWidth, disabled, className, children, ...props },
+    { variant = 'primary', size = 'md', loading, fullWidth, disabled, className, children, onPointerDown, ...props },
     ref,
   ) => {
+    const handlePointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
+      haptics.tap()
+      onPointerDown?.(e)
+    }
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
+        onPointerDown={handlePointerDown}
         className={cn(
           'pressable inline-flex items-center justify-center gap-2 font-semibold outline-none',
           'focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-ink-950',
