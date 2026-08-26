@@ -46,7 +46,7 @@ export function Logo({
       {variant === 'tile' ? (
         <rect width="512" height="512" rx="116" fill={`url(#${gradientId})`} />
       ) : null}
-      <circle cx="170" cy="150" r="120" fill="#ffffff" opacity={variant === 'tile' ? 0.1 : 0} />
+      <circle cx="168" cy="148" r="118" fill="#ffffff" opacity={variant === 'tile' ? 0.1 : 0} />
       <g
         fill="none"
         stroke={variant === 'tile' ? '#ffffff' : 'currentColor'}
@@ -54,10 +54,10 @@ export function Logo({
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M132 150 V362" />
-        <path d="M132 256 L250 150" />
-        <path d="M132 256 L250 362" />
-        <path d="M352 182 A92 92 0 1 0 352 330" />
+        <path d="M150 150 V362" />
+        <path d="M200 256 L300 150" />
+        <path d="M200 256 L300 362" />
+        <path d="M360 192 A78 78 0 1 0 360 320" />
       </g>
     </svg>
   )

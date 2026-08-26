@@ -6,12 +6,11 @@
       <stop offset="1" stop-color="#059669" />
     </linearGradient>
   </defs>
-  <!-- maskable: заливка на всю площадь (обрезается маской), контент в safe-zone -->
   <rect width="512" height="512" fill="url(#kc-g)" />
-  <g fill="none" stroke="#ffffff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 0)">
-    <path d="M132 150 V362" />
-    <path d="M132 256 L250 150" />
-    <path d="M132 256 L250 362" />
-    <path d="M352 182 A92 92 0 1 0 352 330" />
+  <g fill="none" stroke="#ffffff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 150 V362" />
+    <path d="M200 256 L300 150" />
+    <path d="M200 256 L300 362" />
+    <path d="M360 192 A78 78 0 1 0 360 320" />
   </g>
 </svg>
