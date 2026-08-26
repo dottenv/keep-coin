@@ -1,6 +1,9 @@
 from app.schemas.auth import (
     LoginSchema,
     RegisterSchema,
+    TelegramLinkSchema,
+    TelegramLoginSchema,
+    TelegramRegisterSchema,
     UpdateProfileSchema,
     user_out_schema,
 )
@@ -36,6 +39,9 @@ __all__ = [
     "RegisterSchema",
     "UpdateProfileSchema",
     "user_out_schema",
+    "TelegramLoginSchema",
+    "TelegramRegisterSchema",
+    "TelegramLinkSchema",
     "account_create_schema",
     "account_out_schema",
     "account_update_schema",

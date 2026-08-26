@@ -25,6 +25,17 @@ class Config:
     JSON_AS_ASCII = False
     RESTX_JSON = {"ensure_ascii": False}
 
+    # Telegram Mini App: токен бота (используется и бэкендом для проверки
+    # init_data, и ботом для работы с API). username нужен для генерации
+    # deep link, WEBAPP_URL — адрес Mini App, открываемого из бота.
+    TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME")
+    WEBAPP_URL = os.environ.get("WEBAPP_URL")
+    # Время жизни токена привязки аккаунта к Telegram (секунды).
+    TELEGRAM_LINK_TOKEN_TTL = int(os.environ.get("TELEGRAM_LINK_TOKEN_TTL", "900"))
+    # Максимальный возраст init_data (секунды). 0 — без проверки возраста.
+    TELEGRAM_INIT_DATA_MAX_AGE = int(os.environ.get("TELEGRAM_INIT_DATA_MAX_AGE", "86400"))
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

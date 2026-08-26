@@ -5,13 +5,15 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from 'react'
 
 import { onUnauthorized } from '@/lib/api'
+import { getTelegramInitData } from '@/lib/telegram'
 
 import * as authApi from './api'
-import type { User } from './api'
+import type { TelegramProfile, User } from './api'
 
 type Session = {
   status: 'unknown' | 'authenticated' | 'anonymous'
@@ -39,6 +41,15 @@ interface AuthContextValue extends Session {
   register: (payload: authApi.RegisterPayload) => Promise<void>
   updateProfile: (payload: authApi.UpdateProfilePayload) => Promise<User>
   logout: () => Promise<void>
+  /** Данные Telegram-пользователя, ожидающие завершения регистрации. */
+  telegramPending: TelegramProfile | null
+  /**
+   * Автоматический вход через Telegram WebApp: если аккаунт уже привязан —
+   * авторизует, иначе сохраняет telegramPending для экрана регистрации.
+   */
+  telegramAutoLogin: () => Promise<'ok' | 'new' | 'none'>
+  telegramRegister: (payload: authApi.TelegramRegisterPayload) => Promise<void>
+  telegramLink: (initData: string, linkToken: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -48,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     status: 'unknown',
     user: null,
   })
+  const [telegramPending, setTelegramPending] = useState<TelegramProfile | null>(null)
 
   useEffect(() => {
     dispatch({ type: 'restore' })
@@ -91,9 +103,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const telegramAutoLogin = useCallback(async (): Promise<'ok' | 'new' | 'none'> => {
+    const initData = getTelegramInitData()
+    if (!initData) return 'none'
+    try {
+      const result = await authApi.telegramLogin(initData)
+      if (result.status === 'ok' && result.user) {
+        dispatch({ type: 'set_user', user: result.user })
+        setTelegramPending(null)
+        return 'ok'
+      } else if (result.status === 'new' && result.telegram) {
+        setTelegramPending(result.telegram)
+        return 'new'
+      }
+    } catch {
+      /* оставляем пользователя в гостевом режиме */
+    }
+    return 'none'
+  }, [])
+
+  const telegramRegister = useCallback(
+    async (payload: authApi.TelegramRegisterPayload) => {
+      const user = await authApi.telegramRegister(payload)
+      dispatch({ type: 'set_user', user })
+      setTelegramPending(null)
+    },
+    [],
+  )
+
+  const telegramLink = useCallback(async (initData: string, linkToken: string) => {
+    const result = await authApi.telegramLink(initData, linkToken)
+    dispatch({ type: 'set_user', user: result.user })
+  }, [])
+
   const value = useMemo(
-    () => ({ ...state, login, register, updateProfile, logout }),
-    [state, login, register, updateProfile, logout],
+    () => ({
+      ...state,
+      login,
+      register,
+      updateProfile,
+      logout,
+      telegramPending,
+      telegramAutoLogin,
+      telegramRegister,
+      telegramLink,
+    }),
+    [
+      state,
+      login,
+      register,
+      updateProfile,
+      logout,
+      telegramPending,
+      telegramAutoLogin,
+      telegramRegister,
+      telegramLink,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

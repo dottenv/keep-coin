@@ -60,6 +60,37 @@ class UserOutSchema(Schema):
     display_name = fields.Str()
     locale = fields.Str()
     created_at = fields.DateTime()
+    telegram_username = fields.Str(allow_none=True)
 
 
 user_out_schema = UserOutSchema()
+
+
+class TelegramLoginSchema(Schema):
+    init_data = fields.Str(required=True, error_messages={"required": "init_data_required"})
+
+
+class TelegramRegisterSchema(Schema):
+    init_data = fields.Str(required=True, error_messages={"required": "init_data_required"})
+    email = fields.Email(required=True, error_messages={"required": "email_required", "invalid": EMAIL_CODE})
+    display_name = fields.Str(
+        required=True,
+        error_messages={"required": "display_name_required"},
+        validate=Length(min=2, max=120, error=NAME_CODE),
+    )
+    password = fields.Str(
+        required=True,
+        error_messages={"required": "password_required"},
+        validate=Length(min=8, max=128, error=PASSWORD_CODE),
+    )
+    locale = fields.Str(load_default="ru", validate=Regexp(r"^(ru|en)$", error=LOCALE_CODE))
+
+    @validates("email")
+    def _email_unique(self, value: str) -> None:
+        if User.query.filter_by(email=value.strip().lower()).first():
+            raise ValidationError("email_taken", field_name="email")
+
+
+class TelegramLinkSchema(Schema):
+    init_data = fields.Str(required=True, error_messages={"required": "init_data_required"})
+    link_token = fields.Str(required=True, error_messages={"required": "link_token_required"})
