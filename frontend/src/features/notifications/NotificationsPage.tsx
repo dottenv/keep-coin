@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -10,7 +9,6 @@ import { Card } from '@/components/ui/Card'
 import { Select } from '@/components/ui/Input'
 import { SettingsGroup, SettingsRow } from '@/components/ui/Settings'
 import { useToast } from '@/components/ui/Toast'
-import { cn } from '@/lib/cn'
 import { fetchUserTimezone, saveUserTimezone } from '@/features/planner/api'
 import {
   getExistingSubscription,
@@ -36,28 +34,6 @@ const COMMON_TZ = [
   'America/New_York',
   'America/Los_Angeles',
 ]
-
-function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type='button'
-      role='switch'
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        'pressable relative h-7 w-12 shrink-0 rounded-full transition-colors',
-        checked ? 'bg-gradient-to-br from-brand-500 to-brand-600' : 'bg-ink-200 dark:bg-white/15',
-      )}
-    >
-      <span
-        className={cn(
-          'absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all',
-          checked ? 'left-6' : 'left-1',
-        )}
-      />
-    </button>
-  )
-}
 
 export function NotificationsPage() {
   const { t } = useTranslation()
