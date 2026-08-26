@@ -440,6 +440,8 @@ export const ru = {
     sectionAppearance: 'Оформление',
     sectionCategories: 'Категории',
     sectionAccount: 'Аккаунт',
+    sectionApp: 'Приложение',
+    theme: 'Тема',
     appearance: 'Тема оформления',
     appearanceHint: 'Стеклянные поверхности адаптируются автоматически',
     themeLight: 'Светлая',

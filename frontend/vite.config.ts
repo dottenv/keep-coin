@@ -25,6 +25,7 @@ export default defineConfig({
         'icons/apple-touch-icon.png',
       ],
       manifest: {
+        id: '/',
         name: 'Keep Coin',
         short_name: 'Keep Coin',
         description: 'Учёт личных и семейных финансов',
@@ -36,6 +37,7 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         lang: 'ru',
+        dir: 'ltr',
         categories: ['finance', 'productivity', 'lifestyle'],
         icons: [
           {
@@ -69,6 +71,22 @@ export default defineConfig({
             purpose: 'any',
           },
         ],
+        screenshots: [
+          {
+            src: '/icons/splash-390x844.png',
+            sizes: '1170x2532',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Keep Coin — учёт финансов',
+          },
+          {
+            src: '/icons/splash-428x926.png',
+            sizes: '1284x2778',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Keep Coin — счета и операции',
+          },
+        ],
         shortcuts: [
           {
             name: 'Добавить операцию',
@@ -85,39 +103,40 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         cleanupOutdatedCaches: true,
-        navigateFallbackDenylist: [/^\/api\//],
+        // Все навигации (в т.ч. офлайн) отдаём закешированный app-shell,
+        // чтобы PWA не «выпадала» в Safari/внутренний браузер.
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//, /\/sw\.js$/, /\/manifest\.webmanifest$/],
         runtimeCaching: [
           {
-            // Навигация: сначала свежий HTML (чтобы не было «старого» index.html
-            // со ссылками на отсутствующие ассеты), при медленном/офлайн — из кеша.
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
+            // GET-запросы к API кешируем — ранее открытые данные доступны офлайн.
+            urlPattern: ({ url, request }) =>
+              url.pathname.startsWith('/api') && request.method === 'GET',
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'keep-coin-pages',
-              networkTimeoutSeconds: 3,
-              expiration: { maxEntries: 20, maxAgeSeconds: 7 * 24 * 3600 },
+              cacheName: 'kc-api',
+              expiration: { maxEntries: 150, maxAgeSeconds: 7 * 24 * 3600 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            // CSS/JS/шрифты (хешированные имена): отдаём из кеша мгновенно,
-            // в фоне обновляем — исключает «черно-белый» UI при сбое сети.
+            // CSS/JS/шрифты (хешированные имена): из кеша мгновенно, в фоне обновляем.
             urlPattern: ({ request, destination }) =>
               destination === 'style' || destination === 'script' || destination === 'font',
             handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'keep-coin-static',
+              cacheName: 'kc-static',
               expiration: { maxEntries: 64, maxAgeSeconds: 30 * 24 * 3600 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            // Картинки: CacheFirst (не менять, не перезапрашивать).
+            // Картинки: CacheFirst.
             urlPattern: ({ request }) => request.destination === 'image',
             handler: 'CacheFirst',
             options: {
-              cacheName: 'keep-coin-images',
-              expiration: { maxEntries: 32, maxAgeSeconds: 30 * 24 * 3600 },
+              cacheName: 'kc-images',
+              expiration: { maxEntries: 64, maxAgeSeconds: 30 * 24 * 3600 },
             },
           },
         ],

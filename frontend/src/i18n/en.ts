@@ -442,6 +442,8 @@ export const en: Ru = {
     sectionAppearance: 'Appearance',
     sectionCategories: 'Categories',
     sectionAccount: 'Account',
+    sectionApp: 'App',
+    theme: 'Theme',
     appearance: 'Theme',
     appearanceHint: 'Glass surfaces adapt automatically',
     themeLight: 'Light',
