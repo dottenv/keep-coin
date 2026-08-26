@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useToast } from '@/components/ui/Toast'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { useAuth } from '@/features/auth/AuthContext'
-import { getTelegramInitData, initTelegramShell, isTelegramWebApp } from '@/lib/telegram'
+import { getTelegramInitData, initTelegramShell, isTelegramWebApp, applyTelegramInsets, onTelegramSafeAreaChange, onTelegramViewportChange } from '@/lib/telegram'
 
 /**
  * Монтируется внутри AuthProvider + ThemeProvider. Отвечает за:
@@ -21,8 +21,16 @@ export function TelegramGate() {
   const { t } = useTranslation()
 
   useEffect(() => {
-    const cleanup = initTelegramShell((theme) => setTheme(theme))
-    return cleanup
+    const cleanupShell = initTelegramShell((theme) => setTheme(theme))
+    // Учитываем safe-area отступы Telegram (верхняя/нижняя панели, вырезы).
+    applyTelegramInsets()
+    const offSafe = onTelegramSafeAreaChange(applyTelegramInsets)
+    const offViewport = onTelegramViewportChange(applyTelegramInsets)
+    return () => {
+      cleanupShell()
+      offSafe()
+      offViewport()
+    }
   }, [setTheme])
 
   useEffect(() => {

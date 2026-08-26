@@ -46,7 +46,12 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 z-30 flex justify-center"
+      style={{
+        bottom: 'calc(1rem + var(--tg-safe-area-bottom, 0px))',
+        paddingLeft: 'calc(1rem + var(--tg-safe-area-left, 0px))',
+        paddingRight: 'calc(1rem + var(--tg-safe-area-right, 0px))',
+      }}
     >
       <div         className="pointer-events-auto flex w-full max-w-md items-center justify-around rounded-[1.75rem] border border-white/60 bg-white/80 p-2 shadow-lifted backdrop-blur-xl animate-fade-in-up dark:border-white/10 dark:bg-ink-900/60 dark:shadow-[0_10px_40px_rgba(2,6,23,0.5)]">
         {ITEMS.map((item) => (

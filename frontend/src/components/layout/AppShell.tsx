@@ -15,10 +15,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user } = useAuth()
 
   return (
-    <div className="relative min-h-dvh">
+    <div
+      className="relative"
+      style={{ minHeight: 'var(--tg-viewport-height, 100dvh)' }}
+    >
       <GlassBackground />
 
-      <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-32 pt-5 sm:px-6">
+      <div
+        className="relative z-10 mx-auto w-full max-w-2xl px-4 sm:px-6"
+        style={{
+          paddingTop: 'calc(1.25rem + var(--tg-safe-area-top, 0px))',
+          paddingBottom: 'calc(8rem + var(--tg-safe-area-bottom, 0px))',
+        }}
+      >
         <header className="flex min-w-0 items-center gap-3 animate-fade-in">
           <Link to="/" className="flex min-w-0 shrink-0 items-center gap-3" title={t('common.appName')}>
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 text-white shadow-soft">
