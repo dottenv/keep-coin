@@ -21,6 +21,7 @@ import {
   PlannerPage,
   BudgetFormPage,
   GoalFormPage,
+  TelegramRegisterPage,
 } from './pages'
 
 function BootScreen({ label }: { label?: string }) {
@@ -58,6 +59,7 @@ export function AppRoutes() {
       <Routes>
         <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
         <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+        <Route path="/telegram/register" element={<GuestOnly><TelegramRegisterPage /></GuestOnly>} />
         <Route path="/" element={<Protected><DashboardPage /></Protected>} />
         <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
         <Route path="/accounts" element={<Protected><AccountsPage /></Protected>} />

@@ -9,10 +9,11 @@ import { Input } from '@/components/ui/Input'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/features/auth/AuthContext'
 import { notifyError } from '@/features/auth/errors'
+import { isTelegramWebApp } from '@/lib/telegram'
 
 export function LoginPage() {
   const { t } = useTranslation()
-  const { login } = useAuth()
+  const { login, telegramAutoLogin } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
 
@@ -33,6 +34,11 @@ export function LoginPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleTelegram = async () => {
+    const status = await telegramAutoLogin()
+    if (status === 'new') navigate('/telegram/register', { replace: true })
   }
 
   return (
@@ -76,6 +82,18 @@ export function LoginPage() {
           <Button type="submit" fullWidth size="lg" loading={submitting}>
             {t('auth.login')}
           </Button>
+
+          {isTelegramWebApp() ? (
+            <Button
+              type="button"
+              fullWidth
+              size="lg"
+              variant="outline"
+              onClick={handleTelegram}
+            >
+              {t('telegram.continue')}
+            </Button>
+          ) : null}
         </form>
 
         <p className="mt-6 text-center text-sm text-ink-500 dark:text-ink-400">

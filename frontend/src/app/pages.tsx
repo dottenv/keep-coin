@@ -15,6 +15,7 @@ function lazyNamed<T extends NamedModule>(loader: () => Promise<T>, name: keyof 
 const loaders = {
   login: () => import('@/features/auth/pages/LoginPage'),
   register: () => import('@/features/auth/pages/RegisterPage'),
+  telegramRegister: () => import('@/features/auth/pages/TelegramRegisterPage'),
   dashboard: () => import('@/features/dashboard/DashboardPage'),
   profile: () => import('@/features/profile/ProfilePage'),
   accountForm: () => import('@/features/accounts/pages/AccountFormPage'),
@@ -34,6 +35,7 @@ const loaders = {
 
 export const LoginPage = lazyNamed(loaders.login, 'LoginPage')
 export const RegisterPage = lazyNamed(loaders.register, 'RegisterPage')
+export const TelegramRegisterPage = lazyNamed(loaders.telegramRegister, 'TelegramRegisterPage')
 export const DashboardPage = lazyNamed(loaders.dashboard, 'DashboardPage')
 export const ProfilePage = lazyNamed(loaders.profile, 'ProfilePage')
 export const AccountFormPage = lazyNamed(loaders.accountForm, 'AccountFormPage')

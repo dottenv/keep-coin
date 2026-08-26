@@ -12,6 +12,8 @@ import { useToast } from '@/components/ui/Toast'
 import { setLanguage } from '@/i18n'
 import { useAuth } from '@/features/auth/AuthContext'
 import { notifyError } from '@/features/auth/errors'
+import { createTelegramLinkToken } from '@/features/auth/api'
+import { openTelegramLink } from '@/lib/telegram'
 import { wipeAllData } from '@/features/settings/api'
 import { fetchAccounts } from '@/features/accounts/api'
 import { fetchCategories } from '@/features/categories/api'
@@ -60,6 +62,11 @@ const smallIcon = {
   shield: (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5z" />
+    </svg>
+  ),
+  telegram: (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 4 3 11l5 2 2 6 3-4 5 4zM21 4l-9 8" />
     </svg>
   ),
 }
@@ -140,6 +147,12 @@ export function ProfilePage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const [linking, setLinking] = useState(false)
+  const [linkInfo, setLinkInfo] = useState<{
+    deep: string | null
+    url: string | null
+    token: string
+  } | null>(null)
   const queryClient = useQueryClient()
 
   const accountsQuery = useQuery({ queryKey: ['accounts'], queryFn: fetchAccounts })
@@ -203,6 +216,23 @@ export function ProfilePage() {
   const handleWipeAllData = () => {
     if (window.confirm(t('settings.wipeConfirm'))) {
       wipeMutation.mutate()
+    }
+  }
+
+  const handleLinkTelegram = async () => {
+    setLinking(true)
+    try {
+      const data = await createTelegramLinkToken()
+      setLinkInfo({ deep: data.bot_deep_link, url: data.webapp_url, token: data.link_token })
+      if (data.bot_deep_link) {
+        openTelegramLink(data.bot_deep_link)
+      } else if (data.webapp_url) {
+        openTelegramLink(`${data.webapp_url}?link_token=${data.link_token}`)
+      }
+    } catch {
+      toast.show(t('telegram.linkError'), 'error')
+    } finally {
+      setLinking(false)
     }
   }
 
@@ -349,6 +379,46 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
+          </Card>
+        </section>
+
+        {/* ── Telegram ──────────────────────────────────────────────── */}
+        <section className="animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+          <SectionTitle icon={smallIcon.telegram}>{t('telegram.section')}</SectionTitle>
+          <Card className="space-y-4 p-5">
+            {user?.telegram_username ? (
+              <div className="flex items-center gap-3 rounded-2xl bg-brand-500/10 p-4 dark:bg-brand-500/15">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-500/20 text-brand-600 dark:text-brand-300">
+                  {smallIcon.telegram}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">
+                    {t('telegram.linked')}
+                  </p>
+                  <p className="truncate text-xs text-ink-400">@{user.telegram_username}</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs text-ink-400">{t('telegram.linkSub')}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  fullWidth
+                  loading={linking}
+                  onClick={handleLinkTelegram}
+                  className="border-brand-200 text-brand-600 hover:border-brand-300 hover:bg-brand-50 dark:border-brand-400/30 dark:text-brand-300 dark:hover:bg-brand-500/10"
+                >
+                  {smallIcon.telegram}
+                  {t('telegram.linkTitle')}
+                </Button>
+                {linkInfo && !linkInfo.deep && linkInfo.url ? (
+                  <p className="break-all rounded-xl bg-ink-50 p-3 text-center text-xs text-ink-500 dark:bg-white/[0.04]">
+                    {t('telegram.openBot')}: {linkInfo.url}?link_token={linkInfo.token}
+                  </p>
+                ) : null}
+              </>
+            )}
           </Card>
         </section>
 
