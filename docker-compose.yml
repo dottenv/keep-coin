@@ -79,15 +79,14 @@ services:
       frontend:
         condition: service_healthy
 
-  # Telegram-бот (aiogram). Запускается только с профилем `bot`:
-  #   docker compose up --profile bot
-  # Требует TELEGRAM_BOT_TOKEN, WEBAPP_URL и TELEGRAM_BOT_USERNAME в .env.
+  # Telegram-бот (aiogram). Собирается и запускается вместе со всем проектом
+  # (профиль больше не нужен). Требует TELEGRAM_BOT_TOKEN, WEBAPP_URL и
+  # TELEGRAM_BOT_USERNAME в bot/.env (подключается через env_file).
   bot:
     build:
       context: ./bot
     image: keep-coin-bot
     restart: unless-stopped
-    profiles: ["bot"]
     env_file:
       # Все настройки бота (TELEGRAM_BOT_TOKEN, WEBAPP_URL, TELEGRAM_BOT_USERNAME)
       # читаются из bot/.env — отдельный корневой .env для них не нужен.
