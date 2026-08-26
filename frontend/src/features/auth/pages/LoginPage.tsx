@@ -38,7 +38,7 @@ export function LoginPage() {
 
   const handleTelegram = async () => {
     const status = await telegramAutoLogin()
-    if (status === 'new') navigate('/telegram/register', { replace: true })
+    if (status === 'ok') navigate('/', { replace: true })
   }
 
   return (
