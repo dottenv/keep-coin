@@ -25,7 +25,12 @@ bp = Blueprint("auth", __name__)
 
 def _verify_telegram(init_data: str) -> dict | None:
     """Проверяет init_data и возвращает данные пользователя Telegram."""
-    bot_token = current_app.config.get("TELEGRAM_BOT_TOKEN")
+    bot_token = (current_app.config.get("TELEGRAM_BOT_TOKEN") or "").strip()
+    if not bot_token:
+        current_app.logger.error(
+            "TELEGRAM_BOT_TOKEN не задан в backend — верификация init_data невозможна"
+        )
+        return None
     max_age = int(current_app.config.get("TELEGRAM_INIT_DATA_MAX_AGE", 0) or 0)
     return verify_telegram_init_data(init_data, bot_token, max_age)
 
@@ -132,8 +137,17 @@ def telegram_auto():
     Таким образом открытие Mini App из Telegram не требует форм.
     """
     data = TelegramAutoSchema().load(_normalize_payload())
+
+    if not (current_app.config.get("TELEGRAM_BOT_TOKEN") or "").strip():
+        current_app.logger.error("telegram_auto: TELEGRAM_BOT_TOKEN не настроен в backend")
+        return jsonify(error="telegram_not_configured"), 503
+
     tg = _verify_telegram(data["init_data"])
     if tg is None:
+        current_app.logger.warning(
+            "telegram_auto: init_data не прошёл верификацию (возможно, неверный "
+            "TELEGRAM_BOT_TOKEN или init_data не из Telegram)"
+        )
         return jsonify(error="invalid_init_data"), 401
 
     user = UserService.get_by_telegram_id(tg.get("id"))
